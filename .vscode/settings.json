@@ -1,0 +1,12 @@
+{
+    "files.exclude": {
+        "**/*.o": true,
+        "pacman": true,
+        "*.exe": true
+    },
+    "files.associations": {
+        "sdl.h": "c",
+        "__locale": "c",
+        "complex": "c"
+    }
+}
