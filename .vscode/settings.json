@@ -7,6 +7,10 @@
     "files.associations": {
         "sdl.h": "c",
         "__locale": "c",
-        "complex": "c"
+        "complex": "c",
+        "event.h": "c",
+        "random": "c",
+        "locale": "c",
+        "thread": "c"
     }
 }

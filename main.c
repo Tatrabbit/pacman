@@ -33,7 +33,7 @@ static enum _result handle_sdl_event(SDL_Event *evt)
 
 	if (evt->type >= SDL_USEREVENT)
 	{
-		pac_adjust_event(evt);
+		pac_event_adjust(evt);
 		return handle_pac_event(evt);
 	}
 	return _NOTHING;
@@ -41,15 +41,22 @@ static enum _result handle_sdl_event(SDL_Event *evt)
 
 static int main_loop()
 {
+	thread_info info;
 	SDL_Event evt;
 	enum _result result;
 
-forever:
+	if (!pac_event_init(&info))
+		return -1;
+
+	while (1)
+	{
 		if (!SDL_WaitEvent(&evt))
 		{
 			printf("Error: %s\n", SDL_GetError());
 			return -1;
 		}
+
+		pac_event_poll_errors(&info);
 
 		result = _NOTHING;
 		do
@@ -57,10 +64,14 @@ forever:
 			result |= handle_sdl_event(&evt);
 
 			if(result & _QUIT)
-				return 0;
+				goto end;
 		}
 		while (SDL_PollEvent(&evt));
-	goto forever;
+	}
+
+	end:
+	pac_event_cleanup(&info);
+	return (result & _QUIT) != 0;
 }
 
 int main(int argc, char *argv[])
@@ -69,8 +80,6 @@ int main(int argc, char *argv[])
         printf("error initializing SDL: %s\n", SDL_GetError());
         return 1;
     }
-
-	pac_init_events();
 
     SDL_Window *win = SDL_CreateWindow("GAME",
                                     SDL_WINDOWPOS_CENTERED,
