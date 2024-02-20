@@ -1,6 +1,14 @@
-*.o
+# Build
 pacman
+*.o
+
+# OS
+*.DS_Store
+
+# Temp
 *.sw?
-*.afphoto
 *.afphoto~lock~
+
+# Media
 *.png
+*.afphoto

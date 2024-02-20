@@ -1,14 +1,15 @@
-LDLIBS := -lSDL2 -lSDL2_image
-all: pacman
 
-pacman: main.o event.o app.o pacman.o
-main.o: main.c event.h app.h
-event.o: event.c event.h
+LDLIBS = -lSDL2 -lSDL2_image
+
+pacman: app.o event.o main.o texture.o
+	$(CC) $(LDFLAGS) $^ $(LOADLIBES) $(LDLIBS) -o $@
+
 app.o: app.h
-pacman.o: pacman.c pacman.h app.h
+event.o: event.h
+main.o: event.h app.h sprite.h texture.h
+texture.o: texture.h app.h
 
 clean:
 	rm *.o
 	rm pacman
-
 .PHONY: clean all

@@ -1,0 +1,43 @@
+{
+    "tasks": [
+        {
+            "type": "cppbuild",
+            "label": "Debug Build",
+            "command": "make",
+            "args": [
+                "CFLAGS=-g"
+            ],
+            "options": {
+                "cwd": "${workspaceRoot}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "Build all for debug mode."
+        },
+        {
+            "type": "cppbuild",
+            "label": "Clean All",
+            "command": "make",
+            "args": [
+                "clean"
+            ],
+            "options": {
+                "cwd": "${workspaceRoot}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "none",
+                "isDefault": false
+            },
+            "detail": "Clean all built files."
+        }
+    ],
+    "version": "2.0.0"
+}

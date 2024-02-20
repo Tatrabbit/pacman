@@ -1,9 +1,10 @@
-#include <stdio.h>
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_timer.h>
 #include "app.h"
 #include "event.h"
-#include "pacman.h"
+#include "sprite.h"
+#include "texture.h"
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_timer.h>
+#include <stdio.h>
 
 typedef enum
 {
@@ -38,22 +39,12 @@ static result_t handle_sdl_event(SDL_Event *evt)
 	return _NOTHING;
 }
 
-static void blit(SDL_Texture *texture, int x, int y)
-{
-	SDL_Rect dest;
-
-	dest.x = x;
-	dest.y = y;
-	SDL_QueryTexture(texture, NULL, NULL, &dest.w, &dest.h);
-	SDL_RenderCopy(app.renderer, texture, NULL, &dest);
-}
-
-static void draw(pacman_t *pacman)
+static void draw(sprite_t *pacman)
 {
 	SDL_SetRenderDrawColor(app.renderer, 0, 0, 0, 255);
     SDL_RenderClear(app.renderer);
 
-	blit(pacman->texture, pacman->x, pacman->y);
+	pac_tex_draw_sprite(pacman->x, pacman->y, &pacman->tex_idx);
 
     SDL_RenderPresent(app.renderer);
 }
@@ -64,8 +55,10 @@ static int main_loop()
 	SDL_Event evt;
 	result_t result = _NOTHING;
 
-	pacman_t pacman;
-	pac_pac_create(&pacman);
+	sprite_t pacman;
+	memset(&pacman, 0, sizeof(sprite_t));
+	pacman.tex_idx.tile_idx = 3;
+	pacman.tex_idx.palette_idx = 3;
 
 	if (!pac_event_init(&info))
 		return -1;
@@ -103,6 +96,8 @@ int main(int argc, char *argv[])
 	int error;
 	if ((error = pac_app_init()))
 		return error;
+
+	pac_tex_init(argv[0]);
 
 	int success = main_loop();
 
