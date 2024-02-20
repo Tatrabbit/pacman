@@ -1,3 +1,6 @@
 *.o
 pacman
 *.sw?
+*.afphoto
+*.afphoto~lock~
+*.png

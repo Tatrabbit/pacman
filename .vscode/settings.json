@@ -11,6 +11,15 @@
         "event.h": "c",
         "random": "c",
         "locale": "c",
-        "thread": "c"
+        "thread": "c",
+        "sdl_image.h": "c",
+        "array": "c",
+        "deque": "c",
+        "list": "c",
+        "span": "c",
+        "string": "c",
+        "string_view": "c",
+        "vector": "c",
+        "app.h": "c"
     }
 }

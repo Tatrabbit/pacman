@@ -1,29 +1,28 @@
 #include <stdio.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_timer.h>
+#include "app.h"
 #include "event.h"
+#include "pacman.h"
 
-#define INIT_FLAGS (SDL_INIT_TIMER|SDL_INIT_AUDIO|SDL_INIT_VIDEO)
-
-enum _result
+typedef enum
 {
 	_NOTHING = 0x0,
 	_QUIT = 0x1,
 	_DRAW = 0x2,
-};
+} result_t;
 
-static enum _result handle_pac_event(SDL_Event *evt)
+static result_t handle_pac_event(SDL_Event *evt)
 {
 	switch(evt->type)
 	{
 		case PAC_EVENT_DRAW:
-			printf("Timer\n");
 			return _DRAW;
 	}
 	return _NOTHING;
 }
 
-static enum _result handle_sdl_event(SDL_Event *evt)
+static result_t handle_sdl_event(SDL_Event *evt)
 {
 	switch (evt->type)
 	{
@@ -39,11 +38,34 @@ static enum _result handle_sdl_event(SDL_Event *evt)
 	return _NOTHING;
 }
 
+static void blit(SDL_Texture *texture, int x, int y)
+{
+	SDL_Rect dest;
+
+	dest.x = x;
+	dest.y = y;
+	SDL_QueryTexture(texture, NULL, NULL, &dest.w, &dest.h);
+	SDL_RenderCopy(app.renderer, texture, NULL, &dest);
+}
+
+static void draw(pacman_t *pacman)
+{
+	SDL_SetRenderDrawColor(app.renderer, 0, 0, 0, 255);
+    SDL_RenderClear(app.renderer);
+
+	blit(pacman->texture, pacman->x, pacman->y);
+
+    SDL_RenderPresent(app.renderer);
+}
+
 static int main_loop()
 {
 	thread_info info;
 	SDL_Event evt;
-	enum _result result;
+	result_t result = _NOTHING;
+
+	pacman_t pacman;
+	pac_pac_create(&pacman);
 
 	if (!pac_event_init(&info))
 		return -1;
@@ -62,11 +84,13 @@ static int main_loop()
 		do
 		{
 			result |= handle_sdl_event(&evt);
-
 			if(result & _QUIT)
 				goto end;
 		}
 		while (SDL_PollEvent(&evt));
+
+		if (result & _DRAW)
+			draw(&pacman);
 	}
 
 	end:
@@ -76,28 +100,12 @@ static int main_loop()
 
 int main(int argc, char *argv[])
 {
-    if (SDL_Init(INIT_FLAGS) != 0) {
-        printf("error initializing SDL: %s\n", SDL_GetError());
-        return 1;
-    }
-
-    SDL_Window *win = SDL_CreateWindow("GAME",
-                                    SDL_WINDOWPOS_CENTERED,
-                                    SDL_WINDOWPOS_CENTERED,
-                                    500, 500, 0);
-
-    Uint32 render_flags = SDL_RENDERER_ACCELERATED;
-    SDL_Renderer *rend = SDL_CreateRenderer(win, -1, render_flags);
-
-	SDL_SetRenderDrawColor(rend, 0, 0, 0, 255);
-    SDL_RenderClear(rend);
-    SDL_RenderPresent(rend);
+	int error;
+	if ((error = pac_app_init()))
+		return error;
 
 	int success = main_loop();
 
-	SDL_DestroyRenderer(rend);
-    SDL_DestroyWindow(win);
-    SDL_Quit();
-
+	pac_app_cleanup();
 	return success;
 }

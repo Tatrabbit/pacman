@@ -1,6 +1,14 @@
-pacman: main.o event.o
-	gcc -lSDL2 -g main.o event.o -o pacman
-main.o: main.c event.h
-	gcc -c -g main.c
+LDLIBS := -lSDL2 -lSDL2_image
+all: pacman
+
+pacman: main.o event.o app.o pacman.o
+main.o: main.c event.h app.h
 event.o: event.c event.h
-	gcc -c -g event.c
+app.o: app.h
+pacman.o: pacman.c pacman.h app.h
+
+clean:
+	rm *.o
+	rm pacman
+
+.PHONY: clean all

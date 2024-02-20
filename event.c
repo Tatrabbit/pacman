@@ -32,7 +32,7 @@ int pac_event_init(thread_info *info)
     info->timer_id = SDL_AddTimer(FRAME_DELAY, redraw_timer, info);
     if (!info->timer_id)
     {
-        printf("%s", SDL_GetError());
+        SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION, "%s", SDL_GetError());
         return 0;
     }
 
@@ -49,8 +49,8 @@ int pac_event_poll_errors(thread_info *info)
     if(!info->error[0])
         return 0;
 
-    printf("%s", info->error);
-    memset(info, 0, sizeof(thread_info));
+    SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, "%s", info->error);
+    info->error[0] = '\0';
     return 1;
 }
 
