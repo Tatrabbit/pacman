@@ -2,8 +2,10 @@
 #include "event.h"
 #include "sprite.h"
 #include "texture.h"
+
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_timer.h>
+
 #include <stdio.h>
 
 typedef enum
@@ -13,32 +15,11 @@ typedef enum
 	_DRAW = 0x2,
 } result_t;
 
-static result_t handle_pac_event(SDL_Event *evt)
-{
-	switch(evt->type)
-	{
-		case PAC_EVENT_DRAW:
-			return _DRAW;
-	}
-	return _NOTHING;
-}
+static int main_loop();
+static result_t handle_pac_event(SDL_Event *evt);
+static result_t handle_sdl_event(SDL_Event *evt);
 
-static result_t handle_sdl_event(SDL_Event *evt)
-{
-	switch (evt->type)
-	{
-		case SDL_QUIT:
-			return _QUIT;
-	}
-
-	if (evt->type >= SDL_USEREVENT)
-	{
-		pac_event_adjust(evt);
-		return handle_pac_event(evt);
-	}
-	return _NOTHING;
-}
-
+// TODO
 static void draw(sprite_t *pacman)
 {
 	SDL_SetRenderDrawColor(app.renderer, 0, 0, 0, 255);
@@ -49,9 +30,23 @@ static void draw(sprite_t *pacman)
     SDL_RenderPresent(app.renderer);
 }
 
+int main(int argc, char *argv[])
+{
+	int error;
+	if ((error = pac_app_init()))
+		return error;
+
+	pac_tex_init(argv[0]);
+
+	int success = main_loop();
+
+	pac_app_cleanup();
+	return success;
+}
+
 static int main_loop()
 {
-	thread_info info;
+	thread_info_t info;
 	SDL_Event evt;
 	result_t result = _NOTHING;
 
@@ -91,16 +86,28 @@ static int main_loop()
 	return (result & _QUIT) != 0;
 }
 
-int main(int argc, char *argv[])
+static result_t handle_pac_event(SDL_Event *evt)
 {
-	int error;
-	if ((error = pac_app_init()))
-		return error;
+	switch(evt->type)
+	{
+		case PAC_EVENT_DRAW:
+			return _DRAW;
+	}
+	return _NOTHING;
+}
 
-	pac_tex_init(argv[0]);
+static result_t handle_sdl_event(SDL_Event *evt)
+{
+	switch (evt->type)
+	{
+		case SDL_QUIT:
+			return _QUIT;
+	}
 
-	int success = main_loop();
-
-	pac_app_cleanup();
-	return success;
+	if (evt->type >= SDL_USEREVENT)
+	{
+		pac_event_adjust(evt);
+		return handle_pac_event(evt);
+	}
+	return _NOTHING;
 }

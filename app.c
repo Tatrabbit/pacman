@@ -2,11 +2,11 @@
 #include "app.h"
 #include <SDL2/SDL_image.h>
 
-#define INIT_FLAGS (SDL_INIT_TIMER|SDL_INIT_AUDIO|SDL_INIT_VIDEO)
+const int init_flags = (SDL_INIT_TIMER|SDL_INIT_AUDIO|SDL_INIT_VIDEO);
 
 int pac_app_init()
 {
-    if (SDL_Init(INIT_FLAGS) != 0)
+    if (SDL_Init(init_flags) != 0)
     {
 		SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION, "Error initializing SDL: %s\n", SDL_GetError());
         return 1;

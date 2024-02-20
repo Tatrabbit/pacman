@@ -14,7 +14,15 @@ extern
 #endif
 app_t app;
 
+/**
+ * @brief Acquire resources.
+ * @return Non-zero on success.
+ */
 int pac_app_init();
+
+/**
+ * @brief free resources.
+ */
 void pac_app_cleanup();
 
 #endif

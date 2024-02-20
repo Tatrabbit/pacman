@@ -2,6 +2,9 @@
 #include "app.h"
 #include <SDL2/SDL_image.h>
 
+////////////
+// Config //
+////////////
 #define SHEET_FILENAME "atlas.png"
 
 #define SHEET_PALETTES_W 5
@@ -18,28 +21,16 @@
 #define TILE_SIZE 16u
 #define TILE_PADDING 1u
 
-// static void get_source_rect(const texture_t *sprite, SDL_Rect *rect)
-// {
-//     // The 1 texture has
-//     //  5x4 sheets, each with
-//     // 
-
-//     // Which sheet to use
-//     int sx = sprite->palette_idx % SHEET_PALETTES_W;
-//     int sy = sprite->palette_idx / SHEET_PALETTES_W;
-    
-//     // int ty = sprite->palette_idx % SHEET_TILES_W;
-//     // rect->x = TILE_SIZE * 
-// }
-
 SDL_Texture *texture;
-
 const size_t buf_size = 512u;
 
 static void fast_basename(char *path, int length);
 static int replace_basename(char *buf, const char *path, const char *new_basename);
 
-// extern
+
+/////////////
+// Externs //
+/////////////
 
 int pac_tex_init(const char *data_directory)
 {
@@ -115,7 +106,15 @@ void pac_tex_draw_sprite(int x, int y, tex_idx_t *idx)
 	SDL_RenderCopy(app.renderer, texture, &source, &dest);
 }
 
-// basename() if strlen(path) is known
+
+////////////
+// Static //
+////////////
+
+/**
+ * @brief similar to basename()
+ * @param length strlen(path)
+ */
 static void fast_basename(char *path, int length)
 {
     // Iterate backwards and terminate after the /
@@ -132,6 +131,14 @@ static void fast_basename(char *path, int length)
     }
 }
 
+/**
+ * @brief Replace the basename of a path
+ * 
+ * @param buf temporary char array to use
+ * @param path the path to replace the basename of
+ * @param new_basename The new basename to use
+ * @return non-zero on success
+ */
 static int replace_basename(char *buf, const char *path, const char *new_basename)
 {
     int idx = strlen(path);
