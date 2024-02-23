@@ -6,6 +6,6 @@
         "*.png": true
     },
     "files.associations": {
-        "*.h": "c",
+        "*.h": "c"
     }
 }

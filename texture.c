@@ -1,5 +1,6 @@
 #include "texture.h"
 #include "app.h"
+#include "defines.h"
 #include <SDL2/SDL_image.h>
 
 ////////////
@@ -12,13 +13,11 @@
 #define SHEET_LEFT 1
 #define SHEET_TOP 1
 #define SHEET_WIDTH 200
-#define SHEET_HEIGHT 187
+#define SHEET_HEIGHT 186
 
-#define SHEET_TILES_W 10
-#define PALETTE_LEFT 0u
-#define PALETTE_TOP 82u
+#define SHEET_TILES_W 22u
 
-#define TILE_SIZE 16u
+#define SPRITE_TOP 82u
 #define TILE_PADDING 1u
 
 SDL_Texture *texture;
@@ -67,10 +66,10 @@ void pac_tex_cleanup()
     texture = 0;
 }
 
-// The 1 texture atlas has 5x4 sheets
-void pac_tex_draw_sprite(int x, int y, tex_idx_t *idx)
+static void draw_shared(int x, int y, tex_idx_t *idx, int tile_scale, int yoffset)
 {
     const int sheet_count = SHEET_PALETTES_W * SHEET_PALETTES_H;
+    const int tile_size = PAC_TILE_SIZE * tile_scale;
 
     // Wrap palette index
     int palette_idx = idx->palette_idx % sheet_count;
@@ -83,12 +82,12 @@ void pac_tex_draw_sprite(int x, int y, tex_idx_t *idx)
     sy = palette_idx / SHEET_PALETTES_W;
 
     int tx, ty;
-    tx = idx->tile_idx % SHEET_TILES_W;
-    ty = idx->tile_idx / SHEET_TILES_W;
+    tx = idx->tile_idx % (SHEET_TILES_W / tile_scale);
+    ty = idx->tile_idx / (SHEET_TILES_W / tile_scale);
 
     SDL_Rect source, dest;
-    // Area = TILE_SIZE
-    source.w = source.h = dest.w = dest.h = TILE_SIZE;
+    // Area = PAC_TILE_SIZE
+    source.w = source.h = dest.w = dest.h = tile_size;
 
     // Destination Position
     dest.x = x;
@@ -96,14 +95,24 @@ void pac_tex_draw_sprite(int x, int y, tex_idx_t *idx)
 
     // Source Position
     source.x = SHEET_LEFT + (sx * SHEET_WIDTH);
-    source.x += (TILE_SIZE + TILE_PADDING) * tx;
-    source.x += PALETTE_LEFT;
+    source.x += (tile_size + TILE_PADDING) * tx;
 
     source.y = SHEET_TOP + (sy * SHEET_HEIGHT);
-    source.y += (TILE_SIZE + TILE_PADDING) * ty;
-    source.y += PALETTE_TOP;
+    source.y += (tile_size + TILE_PADDING) * ty;
+    source.y += yoffset;
 
 	SDL_RenderCopy(app.renderer, texture, &source, &dest);
+}
+
+// The 1 texture atlas has 5x4 sheets
+void pac_tex_draw_sprite(int x, int y, tex_idx_t *idx)
+{
+    draw_shared(x, y, idx, 2u, SPRITE_TOP);
+}
+
+void pac_tex_draw_tile(int x, int y, tex_idx_t *idx)
+{
+    draw_shared(x, y, idx, 1u, 0u);
 }
 
 

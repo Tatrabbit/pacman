@@ -11,7 +11,18 @@ Linux and MacOS only. Windows isn't supported because my gaming rig is annoying 
 
 VS Code folder settings are included.
 
-Just run make. You'll need sdl2, and the image addon. I intend to do without the image addon, and instead load images in a custom format, with a custom binary format for the image and palette system I so like.
+### get proprietery sprites.
+Arcade - Pac-Man - All AssetsPalettes.png:
+https://www.spriters-resource.com/arcade/pacman/sheet/159361/
+
+Delete the background of all sprites. Just select "black" with a non-contiguous wand, no anti-alising, delete it/make transparent, save as atlas.png. You can use your favorite image tool, but everyone will judge you if you use Gimp. We will judge you harshly.
+
+### run make.
+Assuming you have the sprite sheet ready, just run make. You'll need sdl2, and the image addon. I intend to do without the image addon, and instead load images in a custom format, with a custom binary format for the image and palette system I so like.
+
+### board_data.h
+This is built from a csv file using `board_data.py`. If python is available, make will handle this as part of the build process.
+As for source of the CSV itself, it's Tiled Map Editor. I'll add a project for editing that later. I don't want to push any .png stuff to the repository for file size reasons, so please wait on that until I know it's pretty much dusted off.
 
 ## dedicating this garbage to two pupils.
 * A very longime friend I met on some furry site, whose recent desire to learn Allegro 5 got me thinking about once again continuing that Nipio game he once did music for, long ago.

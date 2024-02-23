@@ -1,4 +1,5 @@
 #include "app.h"
+#include "board.h"
 #include "event.h"
 #include "sprite.h"
 #include "texture.h"
@@ -22,10 +23,16 @@ static result_t handle_sdl_event(SDL_Event *evt);
 // TODO
 static void draw(sprite_t *pacman)
 {
+	// BG
 	SDL_SetRenderDrawColor(app.renderer, 0, 0, 0, 255);
     SDL_RenderClear(app.renderer);
 
+	// Board
+	pac_board_draw();
+
+	// Sprites
 	pac_tex_draw_sprite(pacman->x, pacman->y, &pacman->tex_idx);
+	// TODO
 
     SDL_RenderPresent(app.renderer);
 }
@@ -44,6 +51,7 @@ int main(int argc, char *argv[])
 	return success;
 }
 
+// TODO create "main loop" modules for different scenes...
 static int main_loop()
 {
 	thread_info_t info;
@@ -52,8 +60,8 @@ static int main_loop()
 
 	sprite_t pacman;
 	memset(&pacman, 0, sizeof(sprite_t));
-	pacman.tex_idx.tile_idx = 3;
-	pacman.tex_idx.palette_idx = 3;
+	pacman.tex_idx.tile_idx = 36;
+	pacman.tex_idx.palette_idx = 7;
 
 	if (!pac_event_init(&info))
 		return -1;

@@ -1,6 +1,7 @@
 # Build
 pacman
 *.o
+board_data.h
 
 # OS
 *.DS_Store
@@ -12,3 +13,5 @@ pacman
 # Media
 *.png
 *.afphoto
+*.tsx
+*.tmx
