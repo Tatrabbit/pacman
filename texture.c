@@ -114,6 +114,8 @@ void pac_tex_draw_sprite(int x, int y, tex_idx_t *idx)
 /**
  * @brief similar to basename()
  * @param length strlen(path)
+ * 
+ * @todo Windows support
  */
 static void fast_basename(char *path, int length)
 {
