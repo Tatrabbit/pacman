@@ -4,19 +4,6 @@
 #include "texture.h"
 #include <SDL2/SDL.h>
 
-enum
-{
-    PAC_DIRECTION_NONE = 0b0000,
-
-    PAC_DIRECTION_LEFT  = 0b0001,
-    PAC_DIRECTION_RIGHT = 0b0010,
-    PAC_DIRECTION_UP    = 0b0100,
-    PAC_DIRECTION_DOWN  = 0b1000,
-
-    PAC_DIRECTION_HORIZONTAL = 0b0011,
-    PAC_DIRECTION_VERTICAL   = 0b1100,
-};
-
 typedef struct
 {
     tex_idx_t tex_idx;
@@ -28,7 +15,24 @@ typedef struct
     unsigned char flags;
 } sprite_t;
 
-void pac_sprite_initialize();
-void pac_sprite_draw_all();
+
+/**
+ * @brief Draw a sprite.
+ * 
+ * This is preferable to using pac_tex_draw_sprite, because it takes into account
+ * tile/pixel space conversion.
+ * 
+ * @param sprite Sprite to draw.
+ */
+void pac_sprite_draw(const sprite_t *sprite);
+
+/**
+ * @brief Set position.
+ * 
+ * @param sprite Sprite to act upon.
+ * @param x x position, specified in tiles.
+ * @param y y position, specified in tiles.
+ */
+void pac_sprite_set_pos(sprite_t *sprite, unsigned short x, unsigned short y);
 
 #endif

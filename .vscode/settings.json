@@ -6,6 +6,7 @@
         "*.png": true
     },
     "files.associations": {
-        "*.h": "c"
+        "*.h": "c",
+        "system_error": "c"
     }
 }

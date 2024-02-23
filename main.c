@@ -1,7 +1,7 @@
 #include "app.h"
 #include "board.h"
 #include "event.h"
-#include "sprite.h"
+#include "actor_pacman.h"
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_timer.h>
@@ -12,13 +12,24 @@ typedef enum
 {
 	_NOTHING = 0x0,
 	_QUIT = 0x1,
-	_DRAW = 0x2,
+	_FRAME = 0x2,
 } result_t;
+
+
+#define ACTOR_FIRST 0u
+
+#define ACTOR_PACMAN 0u
+
+// #define ACTOR_GHOST_FIRST 1u
+// #define ACTOR_GHOST_LAST 4u
+
+#define ACTOR_COUNT 1u
+
+static actor_t actors[ACTOR_COUNT];
 
 static int main_loop();
 static result_t handle_pac_event(SDL_Event *evt);
 static result_t handle_sdl_event(SDL_Event *evt);
-
 
 static void draw()
 {
@@ -28,7 +39,9 @@ static void draw()
 
 	// Draw
 	pac_board_draw();
-	pac_sprite_draw_all();
+
+	for (int i = ACTOR_FIRST; i < ACTOR_COUNT; ++i)
+		pac_sprite_draw((sprite_t *)&actors[i]);
 
 	// Flip
     SDL_RenderPresent(app.renderer);
@@ -58,7 +71,9 @@ static int main_loop()
 	if (!pac_event_init(&info))
 		return -1;
 
-	pac_sprite_initialize();
+	pac_actor_pacman_initialize(&actors[ACTOR_PACMAN]);
+
+	// TODO ghosts
 
 	while (1)
 	{
@@ -79,8 +94,13 @@ static int main_loop()
 		}
 		while (SDL_PollEvent(&evt));
 
-		if (result & _DRAW)
+		if (result & _FRAME)
+		{
+			for (int i = 0; i < ACTOR_COUNT; ++i)
+				(*actors[i].update)(&actors[i]);
+
 			draw();
+		}
 	}
 
 	end:
@@ -93,7 +113,7 @@ static result_t handle_pac_event(SDL_Event *evt)
 	switch(evt->type)
 	{
 		case PAC_EVENT_DRAW:
-			return _DRAW;
+			return _FRAME;
 	}
 	return _NOTHING;
 }
@@ -104,6 +124,10 @@ static result_t handle_sdl_event(SDL_Event *evt)
 	{
 		case SDL_QUIT:
 			return _QUIT;
+		case SDL_KEYDOWN:
+		case SDL_KEYUP:
+			pac_actor_pacman_handle_keyboard(&actors[ACTOR_PACMAN], evt);
+			return _NOTHING;
 	}
 
 	if (evt->type >= SDL_USEREVENT)
