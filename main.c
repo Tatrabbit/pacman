@@ -2,7 +2,6 @@
 #include "board.h"
 #include "event.h"
 #include "sprite.h"
-#include "texture.h"
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_timer.h>
@@ -20,20 +19,18 @@ static int main_loop();
 static result_t handle_pac_event(SDL_Event *evt);
 static result_t handle_sdl_event(SDL_Event *evt);
 
-// TODO
-static void draw(sprite_t *pacman)
+
+static void draw()
 {
-	// BG
+	// Clear to black
 	SDL_SetRenderDrawColor(app.renderer, 0, 0, 0, 255);
     SDL_RenderClear(app.renderer);
 
-	// Board
+	// Draw
 	pac_board_draw();
+	pac_sprite_draw_all();
 
-	// Sprites
-	pac_tex_draw_sprite(pacman->x, pacman->y, &pacman->tex_idx);
-	// TODO
-
+	// Flip
     SDL_RenderPresent(app.renderer);
 }
 
@@ -58,13 +55,10 @@ static int main_loop()
 	SDL_Event evt;
 	result_t result = _NOTHING;
 
-	sprite_t pacman;
-	memset(&pacman, 0, sizeof(sprite_t));
-	pacman.tex_idx.tile_idx = 36;
-	pacman.tex_idx.palette_idx = 7;
-
 	if (!pac_event_init(&info))
 		return -1;
+
+	pac_sprite_initialize();
 
 	while (1)
 	{
@@ -86,7 +80,7 @@ static int main_loop()
 		while (SDL_PollEvent(&evt));
 
 		if (result & _DRAW)
-			draw(&pacman);
+			draw();
 	}
 
 	end:
