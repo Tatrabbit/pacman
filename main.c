@@ -1,6 +1,7 @@
 #include "app.h"
 #include "board.h"
 #include "event.h"
+#include "texture.h"
 #include "actor_pacman.h"
 
 #include <SDL2/SDL.h>
@@ -41,7 +42,7 @@ static void draw()
 	pac_board_draw();
 
 	for (int i = ACTOR_FIRST; i < ACTOR_COUNT; ++i)
-		pac_sprite_draw((sprite_t *)&actors[i]);
+		pac_actor_draw(&actors[i]);
 
 	// Flip
     SDL_RenderPresent(app.renderer);

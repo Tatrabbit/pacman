@@ -6,7 +6,7 @@
 typedef struct
 {
     unsigned char tile_idx;
-    unsigned char palette_idx; 
+    unsigned char palette_idx;
 } tex_idx_t;
 
 /**

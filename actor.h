@@ -1,7 +1,7 @@
 #ifndef _ACTOR_H
 #define _ACTOR_H
 
-#include "sprite.h"
+#include "globals.h"
 
 enum
 {
@@ -20,14 +20,40 @@ typedef unsigned char direction_t;
 
 typedef struct actor_s
 {
-    sprite_t sprite;
+    // tex_idx_t:
+    unsigned char tile_idx;
+    unsigned char palette_idx;
+    //
+
+    unit_t pos[2];
 
     /**
      * @brief Update this actor, called once before each draw()
      */
     void (*update)(struct actor_s *self);
 
+    tile_t current_tile[2];
+    unit_t move_distance;
+
     unsigned char flags;
+    //
 } actor_t;
+
+direction_t pac_purify_direction(direction_t flags);
+
+void pac_add_direction_to_tile(tile_t tile[2], tile_t amount, direction_t flags);
+void pac_add_direction_to_unit(tile_t tile[2], tile_t amount, direction_t flags);
+
+void pac_actor_actual_position(const actor_t *self, unit_t position[2]);
+
+/**
+ * @brief Draw a sprite.
+ * 
+ * This is preferable to using pac_tex_draw_sprite, because it takes into account
+ * tile/pixel space conversion.
+ * 
+ * @param sprite Sprite to draw.
+ */
+void pac_actor_draw(const actor_t *actor);
 
 #endif

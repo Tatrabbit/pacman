@@ -1,7 +1,8 @@
 #include "actor_pacman.h"
-#include "sprite.h"
+#include "actor.h"
 #include "board.h"
 #include "globals.h"
+#include <assert.h>
 
 // static const unsigned char pacman_anim_h[] = {39, 50};
 
@@ -15,11 +16,11 @@ void pac_actor_pacman_initialize(actor_t *pacman)
     pacman->flags = 0;
     pacman->update = &update;
 
-    pacman->sprite.pos[0] = pac_tiles2units(14);
-    pacman->sprite.pos[1] = pac_tiles2units(20);
+    pacman->current_tile[0] = 14;
+    pacman->current_tile[1] = 20;
 
-	pacman->sprite.tex_idx.tile_idx = 61;
-	pacman->sprite.tex_idx.palette_idx = 7;
+	pacman->tile_idx = 61;
+	pacman->palette_idx = 7;
 }
 
 void pac_actor_pacman_handle_keyboard(actor_t *pacman, SDL_Event *evt)
@@ -30,49 +31,69 @@ void pac_actor_pacman_handle_keyboard(actor_t *pacman, SDL_Event *evt)
         (pacman->flags ^ direction);
 }
 
-static void apply_direction(const unit_t current_pos[2], unit_t pos[2], direction_t flags)
+static int check_tile_free(const tile_t tile[2])
 {
-    memcpy(pos, current_pos, sizeof(unit_t) * 2);
+    unit_t snapped_pos[2];
+    snapped_pos[0] = pac_tiles2units(tile[0]);
+    snapped_pos[1] = pac_tiles2units(tile[1]);
 
-    // Horizontal movement takes precedence
-    if (flags & PAC_DIRECTION_LEFT)
-        pos[0] = current_pos[0] - speed;
-    else if ( flags & PAC_DIRECTION_RIGHT )
-        pos[0] = current_pos[0] + speed;
-    else if ( flags & PAC_DIRECTION_UP )
-        pos[1] = current_pos[1] - speed;
-    else if ( flags & PAC_DIRECTION_DOWN )
-        pos[1] = current_pos[1] + speed;
+    return !(pac_board_kind(snapped_pos) & PAC_TILE_WALL);
+}
+
+static void try_change_direction(actor_t *self)
+{
+    direction_t choice_direction = pac_purify_direction((self->flags & 0xf0) >> 4);
+    if (!choice_direction)
+        return;
+
+    tile_t choice_tile[2];
+    memcpy(choice_tile, self->current_tile, sizeof(tile_t) * 2);
+
+    pac_add_direction_to_tile(choice_tile, 1, choice_direction);
+    if (!check_tile_free(choice_tile) )
+        return;
+
+    self->flags = (self->flags & 0xf0) | choice_direction;
+}
+
+static int advance_movement(actor_t *self)
+{
+    direction_t current_direction = self->flags & 0xf;
+    if (!current_direction)
+        return 0;
+
+    // Advance pixels
+    self->move_distance += speed;
+    int rolled_over = self->move_distance >= PAC_UNITS_PER_TILE;
+
+    // Advance tiles, re-advance pixels
+    if (rolled_over)
+    {
+        self->move_distance %= PAC_UNITS_PER_TILE;
+        pac_add_direction_to_tile(self->current_tile, 1, current_direction);
+    }
+
+    return rolled_over;
 }
 
 static void update(actor_t *self)
 {
-    direction_t current_direction, next_direction;
-    current_direction = self->flags & 0x0f;
-    next_direction = (self->flags & 0xf0) >> 4;
+    int rolled_over;
 
-    unit_t next_pos[2];
-    apply_direction(self->sprite.pos, next_pos, current_direction);
+    // TODO reverse vs. turn.
+    try_change_direction(self);
+    rolled_over = advance_movement(self);
 
-    // No direction is pressed:
-    if (!next_direction)
-        goto move;
+    if (rolled_over)
+    {
+        try_change_direction(self);
 
-    // Same direction is pressed:
-    if (current_direction & next_direction)
-        goto move;
+        rolled_over = advance_movement(self);
+        assert(!rolled_over);
+    }
 
-    int is_wall;
-
-change_direction:
-    // self->flags = (self->flags & 0xf0) | next_direction;
-    apply_direction(self->sprite.pos, next_pos, next_direction);
-
-move:
-    is_wall = pac_board_kind(self->sprite.pos);
-    self->sprite.tex_idx.palette_idx = is_wall ? 0 : 7;
-
-    memcpy(self->sprite.pos, next_pos, sizeof(unit_t) * 2);
+    // Assign to draw position
+    pac_actor_actual_position(self, self->pos);
 }
 
 static direction_t get_direction_from_keysym(SDL_Keycode sym)
@@ -90,4 +111,11 @@ static direction_t get_direction_from_keysym(SDL_Keycode sym)
         default:
             return 0;
     }
-}
+
+// static void snap_to_tile(unit_t position[2])
+// {
+//     const unit_t per_tile = (PAC_UNITS_PER_TILE * 2);
+
+//     position[0] = (position[0] / per_tile) * per_tile;
+//     position[1] = (position[1] / per_tile) * per_tile;
+// }

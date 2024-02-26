@@ -14,7 +14,8 @@ typedef int pixel_t;
 typedef unsigned short tile_t;
 typedef unsigned short unit_t;
 
-#define pac_tiles2units(x) ((unit_t)((x) * PAC_UNITS_PER_TILE))
+#define pac_tiles2units(x) ((unit_t)(x) * PAC_UNITS_PER_TILE)
+#define pac_tiles2pixels(x) ((pixel_t)(x) * PAC_TILE_SIZE)
 
 /**
  * @brief Converts units to pixels.
