@@ -3,7 +3,7 @@ LDLIBS = -lSDL2 -lSDL2_image
 pacman: actor.o actor_pacman.o app.o board.o event.o globals.o main.o texture.o
 	$(CC) $(LDFLAGS) $^ $(LOADLIBES) $(LDLIBS) -o $@
 
-actor.o: actor.h
+actor.o: actor.h texture.h
 actor_pacman.o: actor_pacman.h actor.o board.h globals.h
 app.o: app.h globals.h
 board.o: board.h board_data.h globals.h texture.h

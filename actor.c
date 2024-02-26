@@ -2,25 +2,26 @@
 #include "texture.h"
 #include <assert.h>
 
-void pac_actor_actual_position(const actor_t *self, unit_t position[2])
+void pac_actor_get_position(const actor_t *self, unit_t position[2])
 {
-    assert(self->move_distance < PAC_UNITS_PER_TILE);
-
     position[0] = pac_tiles2units(self->current_tile[0]);
     position[1] = pac_tiles2units(self->current_tile[1]);
-
-    pac_add_direction_to_unit(position, self->move_distance, self->flags);
 }
 
 void pac_actor_draw(const actor_t *self)
 {
-    // TODO offset
-
+    unit_t position[2];
     pixel_t x, y;
-    x = pac_units2pixels(self->pos[0]);
-    y = pac_units2pixels(self->pos[1]);
 
-    pac_tex_draw_sprite(x, y, (tex_idx_t *)self);
+    assert(self->move_distance < PAC_UNITS_PER_TILE);
+    pac_actor_get_position(self, position);
+    pac_add_direction_to_unit(position, self->move_distance, self->flags);
+
+    assert(sizeof(pixel_t) >= sizeof(int));
+    x = pac_units2pixels(position[0]);
+    y = pac_units2pixels(position[1]);
+
+    pac_tex_draw_sprite((int)x, (int)y, (tex_idx_t *)self);
 }
 
 direction_t pac_purify_direction(direction_t flags)

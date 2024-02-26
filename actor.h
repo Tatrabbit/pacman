@@ -25,8 +25,6 @@ typedef struct actor_s
     unsigned char palette_idx;
     //
 
-    unit_t pos[2];
-
     /**
      * @brief Update this actor, called once before each draw()
      */
@@ -35,16 +33,17 @@ typedef struct actor_s
     tile_t current_tile[2];
     unit_t move_distance;
 
-    unsigned char flags;
+    direction_t flags;
     //
 } actor_t;
 
 direction_t pac_purify_direction(direction_t flags);
 
 void pac_add_direction_to_tile(tile_t tile[2], tile_t amount, direction_t flags);
-void pac_add_direction_to_unit(tile_t tile[2], tile_t amount, direction_t flags);
+void pac_add_direction_to_unit(unit_t tile[2], unit_t amount, direction_t flags);
 
-void pac_actor_actual_position(const actor_t *self, unit_t position[2]);
+void pac_actor_get_position(const actor_t *self, unit_t position[2]);
+// void pac_actor_actual_position(const actor_t *self, unit_t position[2]);
 
 /**
  * @brief Draw a sprite.

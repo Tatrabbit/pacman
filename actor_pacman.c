@@ -16,6 +16,7 @@ void pac_actor_pacman_initialize(actor_t *pacman)
     pacman->flags = 0;
     pacman->update = &update;
 
+    pacman->move_distance = 0;
     pacman->current_tile[0] = 14;
     pacman->current_tile[1] = 20;
 
@@ -31,69 +32,89 @@ void pac_actor_pacman_handle_keyboard(actor_t *pacman, SDL_Event *evt)
         (pacman->flags ^ direction);
 }
 
-static int check_tile_free(const tile_t tile[2])
+// static int check_tile_free(const unit_t tile[2])
+// {
+//     // unit_t snapped_pos[2];
+//     // snapped_pos[0] = pac_tiles2units(tile[0]);
+//     // snapped_pos[1] = pac_tiles2units(tile[1]);
+
+//     return !(pac_board_kind(tile) & PAC_TILE_WALL);
+// }
+
+static int try_start_moving(actor_t *self)
 {
-    unit_t snapped_pos[2];
-    snapped_pos[0] = pac_tiles2units(tile[0]);
-    snapped_pos[1] = pac_tiles2units(tile[1]);
-
-    return !(pac_board_kind(snapped_pos) & PAC_TILE_WALL);
-}
-
-static void try_change_direction(actor_t *self)
-{
-    direction_t choice_direction = pac_purify_direction((self->flags & 0xf0) >> 4);
-    if (!choice_direction)
-        return;
-
-    tile_t choice_tile[2];
-    memcpy(choice_tile, self->current_tile, sizeof(tile_t) * 2);
-
-    pac_add_direction_to_tile(choice_tile, 1, choice_direction);
-    if (!check_tile_free(choice_tile) )
-        return;
-
-    self->flags = (self->flags & 0xf0) | choice_direction;
-}
-
-static int advance_movement(actor_t *self)
-{
-    direction_t current_direction = self->flags & 0xf;
-    if (!current_direction)
+    direction_t direction = pac_purify_direction(self->flags >> 4);
+    if (!direction)
         return 0;
 
+    unit_t position[2];
+    pac_actor_get_position(self, position);
+    pac_add_direction_to_unit(position, PAC_UNITS_PER_TILE, direction);
+
+    if (pac_board_kind(position) & PAC_TILE_WALL)
+        return 0;
+
+    self->flags = self->flags | direction;
+    return 1;
+}
+
+// static void try_turn(actor_t *self)
+// {
+// }
+
+// static void try_change_direction(actor_t *self)
+// {
+//     direction_t choice_direction = pac_purify_direction((self->flags & 0xf0) >> 4);
+//     if (!choice_direction)
+//         return;
+
+//     tile_t choice_tile[2];
+//     memcpy(choice_tile, self->current_tile, sizeof(tile_t) * 2);
+
+//     pac_add_direction_to_tile(choice_tile, 1, choice_direction);
+//     if (!check_tile_free(choice_tile) )
+//         return;
+
+//     self->flags = (self->flags & 0xf0) | choice_direction;
+// }
+
+static int advance_movement(actor_t *self, direction_t current_direction)
+{
     // Advance pixels
     self->move_distance += speed;
-    int rolled_over = self->move_distance >= PAC_UNITS_PER_TILE;
+    int overflow = self->move_distance >= PAC_UNITS_PER_TILE;
 
     // Advance tiles, re-advance pixels
-    if (rolled_over)
+    if (overflow)
     {
         self->move_distance %= PAC_UNITS_PER_TILE;
         pac_add_direction_to_tile(self->current_tile, 1, current_direction);
     }
 
-    return rolled_over;
+    return overflow;
 }
 
 static void update(actor_t *self)
 {
-    int rolled_over;
+    direction_t current_direction = pac_purify_direction(self->flags & 0xf);
+    if (!current_direction && !try_start_moving(self) )
+        return;
 
-    // TODO reverse vs. turn.
-    try_change_direction(self);
-    rolled_over = advance_movement(self);
+    // try_reverse(self);
 
-    if (rolled_over)
-    {
-        try_change_direction(self);
+    int overflow;
+    overflow = advance_movement(self, current_direction);
 
-        rolled_over = advance_movement(self);
-        assert(!rolled_over);
-    }
+    // if (overflow)
+    // {
+    //     try_turn(self);
+
+    //     overflow = advance_movement(self);
+    //     assert(!overflow);
+    // }
 
     // Assign to draw position
-    pac_actor_actual_position(self, self->pos);
+    // pac_actor_actual_position(self, self->pos);
 }
 
 static direction_t get_direction_from_keysym(SDL_Keycode sym)
@@ -111,11 +132,4 @@ static direction_t get_direction_from_keysym(SDL_Keycode sym)
         default:
             return 0;
     }
-
-// static void snap_to_tile(unit_t position[2])
-// {
-//     const unit_t per_tile = (PAC_UNITS_PER_TILE * 2);
-
-//     position[0] = (position[0] / per_tile) * per_tile;
-//     position[1] = (position[1] / per_tile) * per_tile;
-// }
+}
