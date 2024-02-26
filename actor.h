@@ -12,8 +12,11 @@ enum
     PAC_DIRECTION_UP    = 0b0100,
     PAC_DIRECTION_DOWN  = 0b1000,
 
-    PAC_DIRECTION_HORIZONTAL = 0b0011,
-    PAC_DIRECTION_VERTICAL   = 0b1100,
+    PAC_DIRECTION_HORIZONTAL = (PAC_DIRECTION_LEFT | PAC_DIRECTION_RIGHT),
+    PAC_DIRECTION_VERTICAL   = (PAC_DIRECTION_UP | PAC_DIRECTION_DOWN),
+
+    PAC_DIRECTION_NEGATIVE = (PAC_DIRECTION_LEFT | PAC_DIRECTION_UP),
+    PAC_DIRECTION_POSITIVE = (PAC_DIRECTION_RIGHT | PAC_DIRECTION_DOWN),
 };
 
 typedef unsigned char direction_t;
@@ -38,6 +41,7 @@ typedef struct actor_s
 } actor_t;
 
 direction_t pac_purify_direction(direction_t flags);
+direction_t pac_same_axis(direction_t a, direction_t b);
 
 void pac_add_direction_to_tile(tile_t tile[2], tile_t amount, direction_t flags);
 void pac_add_direction_to_unit(unit_t tile[2], unit_t amount, direction_t flags);

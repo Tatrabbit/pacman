@@ -43,6 +43,17 @@ direction_t pac_purify_direction(direction_t flags)
         return 0;
 }
 
+direction_t pac_same_axis(direction_t a, direction_t b)
+{
+    if ((a | b) & PAC_DIRECTION_HORIZONTAL)
+        return PAC_DIRECTION_HORIZONTAL;
+
+    if ((a | b) & PAC_DIRECTION_VERTICAL)
+        return PAC_DIRECTION_VERTICAL;
+
+    return 0;
+}
+
 // Horizontal movement takes precedence
 #define ADD_DEFINE(t) void pac_add_direction_to_##t ( t##_t t[2], t ## _t amount, direction_t flags) { \
     if (flags & PAC_DIRECTION_LEFT) \

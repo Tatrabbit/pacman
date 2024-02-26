@@ -41,7 +41,7 @@ void pac_actor_pacman_handle_keyboard(actor_t *pacman, SDL_Event *evt)
 //     return !(pac_board_kind(tile) & PAC_TILE_WALL);
 // }
 
-static int try_start_moving(actor_t *self)
+static int try_start_direction(actor_t *self)
 {
     direction_t direction = pac_purify_direction(self->flags >> 4);
     if (!direction)
@@ -56,6 +56,28 @@ static int try_start_moving(actor_t *self)
 
     self->flags = self->flags | direction;
     return 1;
+}
+
+static int try_reverse_direction(actor_t *self)
+{
+    direction_t current_direction, choice_direction;
+
+    choice_direction = pac_purify_direction(self->flags >> 4);
+    if (!choice_direction)
+        return 0;
+
+    current_direction = pac_purify_direction(self->flags & 0xf);
+    if ( current_direction == choice_direction)
+        return 0;
+
+    if (!pac_same_axis(current_direction, choice_direction))
+        return 0;
+
+    // Reverse the location storage
+    pac_add_direction_to_tile(self->current_tile, -1, choice_direction);
+    self->move_distance = PAC_UNITS_PER_TILE - self->move_distance;
+
+    return (self->flags = (self->flags & 0xf0) | choice_direction);
 }
 
 // static void try_turn(actor_t *self)
@@ -78,8 +100,11 @@ static int try_start_moving(actor_t *self)
 //     self->flags = (self->flags & 0xf0) | choice_direction;
 // }
 
-static int advance_movement(actor_t *self, direction_t current_direction)
+static int advance_movement(actor_t *self)
 {
+    direction_t current_direction;
+    current_direction = self->flags & 0xf;
+
     // Advance pixels
     self->move_distance += speed;
     int overflow = self->move_distance >= PAC_UNITS_PER_TILE;
@@ -97,13 +122,13 @@ static int advance_movement(actor_t *self, direction_t current_direction)
 static void update(actor_t *self)
 {
     direction_t current_direction = pac_purify_direction(self->flags & 0xf);
-    if (!current_direction && !try_start_moving(self) )
+    if ((!current_direction) && (!try_start_direction(self)) )
         return;
 
-    // try_reverse(self);
+    try_reverse_direction(self);
 
     int overflow;
-    overflow = advance_movement(self, current_direction);
+    overflow = advance_movement(self);
 
     // if (overflow)
     // {
