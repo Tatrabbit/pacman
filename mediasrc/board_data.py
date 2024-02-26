@@ -1,9 +1,9 @@
 # Convert the .csv file to an h file, ready to be built.
 
-INPUT_FILENAME = "board_data.csv"
-OUTPUT_FILENAME = "board_data.h"
+INPUT_FILENAME = "./board_data.csv"
+OUTPUT_FILENAME = "../board_data.h"
 
-VAR_TYPE = "const static unsigned char"
+VAR_TYPE = "static unsigned char"
 VAR_NAME = "board_idx_data"
 
 with open(INPUT_FILENAME, "r") as f:

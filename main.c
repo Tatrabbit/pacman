@@ -71,6 +71,7 @@ static int main_loop()
 	if (!pac_event_init(&info))
 		return -1;
 
+	pac_board_initialize();
 	pac_actor_pacman_initialize(&actors[ACTOR_PACMAN]);
 
 	// TODO ghosts

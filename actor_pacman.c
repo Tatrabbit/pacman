@@ -1,5 +1,6 @@
 #include "actor_pacman.h"
 #include "sprite.h"
+#include "board.h"
 #include "globals.h"
 
 // static const unsigned char pacman_anim_h[] = {39, 50};
@@ -14,8 +15,8 @@ void pac_actor_pacman_initialize(actor_t *pacman)
     pacman->flags = 0;
     pacman->update = &update;
 
-    pacman->sprite.pos[0] = pac_tiles2units(13);
-    pacman->sprite.pos[1] = pac_tiles2units(16);
+    pacman->sprite.pos[0] = pac_tiles2units(14);
+    pacman->sprite.pos[1] = pac_tiles2units(20);
 
 	pacman->sprite.tex_idx.tile_idx = 61;
 	pacman->sprite.tex_idx.palette_idx = 7;
@@ -61,11 +62,16 @@ static void update(actor_t *self)
     if (current_direction & next_direction)
         goto move;
 
+    int is_wall;
+
 change_direction:
-    self->flags = (self->flags & 0xf0) | next_direction;
+    // self->flags = (self->flags & 0xf0) | next_direction;
     apply_direction(self->sprite.pos, next_pos, next_direction);
 
 move:
+    is_wall = pac_board_kind(self->sprite.pos);
+    self->sprite.tex_idx.palette_idx = is_wall ? 0 : 7;
+
     memcpy(self->sprite.pos, next_pos, sizeof(unit_t) * 2);
 }
 

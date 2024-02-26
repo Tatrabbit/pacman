@@ -10,6 +10,9 @@ board_data.h
 *.sw?
 *.afphoto~lock~
 
+# User
+*.tiled-session
+
 # Media
 *.png
 *.afphoto
