@@ -43,15 +43,14 @@ direction_t pac_purify_direction(direction_t flags)
         return 0;
 }
 
-direction_t pac_same_axis(direction_t a, direction_t b)
+int pac_same_axis(direction_t a, direction_t b)
 {
-    if ((a | b) & PAC_DIRECTION_HORIZONTAL)
-        return PAC_DIRECTION_HORIZONTAL;
+    direction_t overlap = a | b;
 
-    if ((a | b) & PAC_DIRECTION_VERTICAL)
-        return PAC_DIRECTION_VERTICAL;
+    direction_t h = (overlap & PAC_DIRECTION_HORIZONTAL) != 0;
+    direction_t v = (overlap & PAC_DIRECTION_VERTICAL) != 0;
 
-    return 0;
+    return h != v;
 }
 
 // Horizontal movement takes precedence

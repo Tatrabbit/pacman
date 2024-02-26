@@ -37,17 +37,15 @@ typedef struct actor_s
     unit_t move_distance;
 
     direction_t flags;
-    //
 } actor_t;
 
 direction_t pac_purify_direction(direction_t flags);
-direction_t pac_same_axis(direction_t a, direction_t b);
+int pac_same_axis(direction_t a, direction_t b);
 
 void pac_add_direction_to_tile(tile_t tile[2], tile_t amount, direction_t flags);
 void pac_add_direction_to_unit(unit_t tile[2], unit_t amount, direction_t flags);
 
 void pac_actor_get_position(const actor_t *self, unit_t position[2]);
-// void pac_actor_actual_position(const actor_t *self, unit_t position[2]);
 
 /**
  * @brief Draw a sprite.

@@ -9,7 +9,12 @@
 static void update(actor_t *self);
 static direction_t get_direction_from_keysym(SDL_Keycode sym);
 
-const int speed = 60;
+static const int speed = 60;
+
+
+/////////////
+// Externs //
+/////////////
 
 void pac_actor_pacman_initialize(actor_t *pacman)
 {
@@ -32,14 +37,10 @@ void pac_actor_pacman_handle_keyboard(actor_t *pacman, SDL_Event *evt)
         (pacman->flags ^ direction);
 }
 
-// static int check_tile_free(const unit_t tile[2])
-// {
-//     // unit_t snapped_pos[2];
-//     // snapped_pos[0] = pac_tiles2units(tile[0]);
-//     // snapped_pos[1] = pac_tiles2units(tile[1]);
 
-//     return !(pac_board_kind(tile) & PAC_TILE_WALL);
-// }
+////////////
+// Static //
+////////////
 
 static int try_start_direction(actor_t *self)
 {
@@ -80,25 +81,30 @@ static int try_reverse_direction(actor_t *self)
     return (self->flags = (self->flags & 0xf0) | choice_direction);
 }
 
-// static void try_turn(actor_t *self)
-// {
-// }
+static int try_turn(actor_t *self)
+{
+    direction_t current_direction, choice_direction;
 
-// static void try_change_direction(actor_t *self)
-// {
-//     direction_t choice_direction = pac_purify_direction((self->flags & 0xf0) >> 4);
-//     if (!choice_direction)
-//         return;
+    choice_direction = pac_purify_direction(self->flags >> 4);
+    if (!choice_direction)
+        return 0;
+    
+    current_direction = pac_purify_direction(self->flags & 0xf);
+    if ( current_direction == choice_direction)
+        return 0;
 
-//     tile_t choice_tile[2];
-//     memcpy(choice_tile, self->current_tile, sizeof(tile_t) * 2);
+    if (pac_same_axis(choice_direction, current_direction))
+        return 0;
 
-//     pac_add_direction_to_tile(choice_tile, 1, choice_direction);
-//     if (!check_tile_free(choice_tile) )
-//         return;
+    unit_t position[2];
+    pac_actor_get_position(self, position);
+    pac_add_direction_to_unit(position, PAC_UNITS_PER_TILE, choice_direction);
 
-//     self->flags = (self->flags & 0xf0) | choice_direction;
-// }
+    if (pac_board_kind(position) & PAC_TILE_WALL)
+        return 0;
+    
+    return self->flags = (self->flags & 0xf0) | choice_direction;
+}
 
 static int advance_movement(actor_t *self)
 {
@@ -114,12 +120,21 @@ static int advance_movement(actor_t *self)
     {
         self->move_distance %= PAC_UNITS_PER_TILE;
         pac_add_direction_to_tile(self->current_tile, 1, current_direction);
+
+        unit_t position[2];
+        pac_actor_get_position(self, position);
+        pac_add_direction_to_unit(position, PAC_UNITS_PER_TILE, current_direction);
+        if (pac_board_kind(position) & PAC_TILE_WALL)
+        {
+            self->move_distance = 0;
+            self->flags = (self->flags & 0xf0);
+        }
     }
 
     return overflow;
 }
 
-static void update(actor_t *self)
+static void update_movement(actor_t *self)
 {
     direction_t current_direction = pac_purify_direction(self->flags & 0xf);
     if ((!current_direction) && (!try_start_direction(self)) )
@@ -127,19 +142,13 @@ static void update(actor_t *self)
 
     try_reverse_direction(self);
 
-    int overflow;
-    overflow = advance_movement(self);
+    if (advance_movement(self))
+        try_turn(self);
+}
 
-    // if (overflow)
-    // {
-    //     try_turn(self);
-
-    //     overflow = advance_movement(self);
-    //     assert(!overflow);
-    // }
-
-    // Assign to draw position
-    // pac_actor_actual_position(self, self->pos);
+static void update(actor_t *self)
+{
+    update_movement(self);
 }
 
 static direction_t get_direction_from_keysym(SDL_Keycode sym)
