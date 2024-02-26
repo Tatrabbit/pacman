@@ -2,16 +2,13 @@
 #define _SPRITE_H
 
 #include "texture.h"
+#include "globals.h"
 #include <SDL2/SDL.h>
 
 typedef struct
 {
     tex_idx_t tex_idx;
-
-    // Measured in PAC_UNITS_PER_PIXEL:
-    unsigned short x;
-    unsigned short y;
-
+    unit_t pos[2];
     unsigned char flags;
 } sprite_t;
 
@@ -26,13 +23,5 @@ typedef struct
  */
 void pac_sprite_draw(const sprite_t *sprite);
 
-/**
- * @brief Set position.
- * 
- * @param sprite Sprite to act upon.
- * @param x x position, specified in tiles.
- * @param y y position, specified in tiles.
- */
-void pac_sprite_set_pos(sprite_t *sprite, unsigned short x, unsigned short y);
 
 #endif

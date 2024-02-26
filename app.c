@@ -1,6 +1,6 @@
 #define _APP_C
 #include "app.h"
-#include "defines.h"
+#include "globals.h"
 #include <SDL2/SDL_image.h>
 
 const int init_flags = (SDL_INIT_TIMER|SDL_INIT_AUDIO|SDL_INIT_VIDEO);
@@ -16,8 +16,8 @@ int pac_app_init()
 	IMG_Init(IMG_INIT_PNG);
 
     int size_x, size_y;
-    size_x = PAC_BOARD_TILES_W * PAC_TILE_SIZE;
-    size_y = PAC_BOARD_TILES_H * PAC_TILE_SIZE;
+    size_x = PAC_SCREEN_TILES_W * PAC_TILE_SIZE;
+    size_y = PAC_SCREEN_TILES_H * PAC_TILE_SIZE;
 
     app.window = SDL_CreateWindow("Pac-Man",
                                     SDL_WINDOWPOS_CENTERED,

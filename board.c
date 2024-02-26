@@ -1,5 +1,5 @@
 #include "board.h"
-#include "defines.h"
+#include "globals.h"
 #include "texture.h"
 
 // Auto-generated; see board_data.py
@@ -12,8 +12,8 @@ static void draw_tile(tex_idx_t *tex_idx, int i)
         return;
 
     int x, y;
-    x = (i % PAC_BOARD_TILES_W) * PAC_TILE_SIZE;
-    y = i / PAC_BOARD_TILES_W * PAC_TILE_SIZE;
+    x = (i % PAC_SCREEN_TILES_W) * PAC_TILE_SIZE;
+    y = i / PAC_SCREEN_TILES_W * PAC_TILE_SIZE;
 
     pac_tex_draw_tile(x, y, tex_idx);
 }
@@ -25,7 +25,7 @@ void pac_board_draw()
 
     int start, end;
     start = 0;
-    end = PAC_BOARD_TILES_W * header_height;
+    end = PAC_SCREEN_TILES_W * header_height;
 
     tex_idx_t tex_idx;
 
@@ -39,7 +39,7 @@ void pac_board_draw()
     tex_idx.palette_idx = 8;
 
     start = end;
-    end = PAC_BOARD_TILES_W * (PAC_BOARD_TILES_H - footer_height);
+    end = PAC_SCREEN_TILES_W * (PAC_SCREEN_TILES_H - footer_height);
     for (int i = start; i < end; ++i)
         draw_tile(&tex_idx, i);
     
@@ -48,7 +48,7 @@ void pac_board_draw()
     tex_idx.palette_idx = 7;
 
     start = end;
-    end += PAC_BOARD_TILES_W * footer_height;
+    end += PAC_SCREEN_TILES_W * footer_height;
     for (int i = start; i < end; ++i)
         draw_tile(&tex_idx, i);
 }

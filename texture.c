@@ -1,6 +1,6 @@
 #include "texture.h"
 #include "app.h"
-#include "defines.h"
+#include "globals.h"
 #include <SDL2/SDL_image.h>
 
 ////////////

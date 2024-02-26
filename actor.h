@@ -16,6 +16,8 @@ enum
     PAC_DIRECTION_VERTICAL   = 0b1100,
 };
 
+typedef unsigned char direction_t;
+
 typedef struct actor_s
 {
     sprite_t sprite;
