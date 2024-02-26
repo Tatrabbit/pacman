@@ -21,6 +21,9 @@ void pac_actor_draw(const actor_t *self)
     x = pac_units2pixels(position[0]);
     y = pac_units2pixels(position[1]);
 
+    x += -3;
+    y += -3;
+
     pac_tex_draw_sprite((int)x, (int)y, (tex_idx_t *)self);
 }
 

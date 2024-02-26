@@ -73,6 +73,7 @@ static int main_loop()
 		return -1;
 
 	pac_board_initialize();
+	pac_board_reset();
 	pac_actor_pacman_initialize(&actors[ACTOR_PACMAN]);
 
 	// TODO ghosts

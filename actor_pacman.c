@@ -42,6 +42,14 @@ void pac_actor_pacman_handle_keyboard(actor_t *pacman, SDL_Event *evt)
 // Static //
 ////////////
 
+static void eat_pellet(actor_t *self)
+{
+    unit_t position[2];
+    pac_actor_get_position(self, position);
+    pac_board_eat(position);
+}
+
+
 static int try_start_direction(actor_t *self)
 {
     direction_t direction = pac_purify_direction(self->flags >> 4);
@@ -134,21 +142,27 @@ static int advance_movement(actor_t *self)
     return overflow;
 }
 
-static void update_movement(actor_t *self)
+static int update_movement(actor_t *self)
 {
     direction_t current_direction = pac_purify_direction(self->flags & 0xf);
     if ((!current_direction) && (!try_start_direction(self)) )
-        return;
+        return 0;
 
     try_reverse_direction(self);
 
     if (advance_movement(self))
+    {
         try_turn(self);
+        return 1;
+    }
+
+    return 0;
 }
 
 static void update(actor_t *self)
 {
-    update_movement(self);
+    if (update_movement(self))
+        eat_pellet(self);
 }
 
 static direction_t get_direction_from_keysym(SDL_Keycode sym)
