@@ -1,26 +1,47 @@
 #ifndef _APP_H
 #define _APP_H
+/**
+ * @file app.h
+ * @copyright MIT License. Full details are in the `LICENSE` file in the project's root directory.
+ * 
+ * @brief Interface to system-wide utilities.
+ */
 
 #include <SDL2/SDL.h>
 
-typedef struct
+/**
+ * @brief System-wide toolbox.
+ */
+struct app_s
 {
+	/**
+	 * @brief The main game window.
+	 */
 	SDL_Window *window;
-	SDL_Renderer *renderer;
-} app_t;
 
+	/**
+	 * @brief The primary renderer.
+	 */
+	SDL_Renderer *renderer;
+};
+
+/**
+ * @brief Singleton defined in app.c
+ */
 #ifndef _APP_C
 extern
 #endif
-app_t app;
+struct app_s app;
 
 /**
+ * @static @memberof app_s
  * @brief Acquire resources.
  * @return Non-zero on success.
  */
 int pac_app_init();
 
 /**
+ * @static @memberof app_s
  * @brief free resources.
  */
 void pac_app_cleanup();

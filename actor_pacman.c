@@ -29,7 +29,7 @@ void pac_actor_pacman_initialize(actor_t *pacman)
 	pacman->palette_idx = 7;
 }
 
-void pac_actor_pacman_handle_keyboard(actor_t *pacman, SDL_Event *evt)
+void pac_actor_pacman_handle_keyboard(actor_t *pacman, const SDL_Event *evt)
 {    
     int direction = get_direction_from_keysym(evt->key.keysym.sym) << 4;
     pacman->flags = (evt->type == SDL_KEYDOWN) ?

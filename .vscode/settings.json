@@ -7,5 +7,10 @@
     },
     "files.associations": {
         "*.h": "c",
-    }
+    },
+    "editor.acceptSuggestionOnEnter": "off",
+    "C_Cpp.doxygen.generatedStyle": "/**",
+    "C_Cpp.commentContinuationPatterns": [
+        "/**"
+    ],
 }

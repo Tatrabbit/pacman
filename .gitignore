@@ -2,6 +2,7 @@
 pacman
 *.o
 board_data.h
+docs
 
 # OS
 *.DS_Store

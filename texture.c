@@ -66,7 +66,7 @@ void pac_tex_cleanup()
     texture = 0;
 }
 
-static void draw_shared(int x, int y, tex_idx_t *idx, int tile_scale, int yoffset)
+static void draw_shared(int x, int y, const tex_idx_t *idx, int tile_scale, int yoffset)
 {
     const int sheet_count = SHEET_PALETTES_W * SHEET_PALETTES_H;
     const int tile_size = PAC_TILE_SIZE * tile_scale;
@@ -105,12 +105,12 @@ static void draw_shared(int x, int y, tex_idx_t *idx, int tile_scale, int yoffse
 }
 
 // The 1 texture atlas has 5x4 sheets
-void pac_tex_draw_sprite(pixel_t x, pixel_t y, tex_idx_t *idx)
+void pac_tex_draw_sprite(pixel_t x, pixel_t y, const tex_idx_t *idx)
 {
     draw_shared(x, y, idx, 2u, SPRITE_TOP);
 }
 
-void pac_tex_draw_tile(pixel_t x, pixel_t y, tex_idx_t *idx)
+void pac_tex_draw_tile(pixel_t x, pixel_t y, const tex_idx_t *idx)
 {
     draw_shared(x, y, idx, 1u, 0u);
 }

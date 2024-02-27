@@ -1,22 +1,68 @@
 #ifndef _BOARD_H
 #define _BOARD_H
+/**
+ * @file board.h
+ * @copyright MIT License. Full details are in the `LICENSE` file in the project's root directory.
+ * 
+ * @brief Implements the game board, including map collision.
+ * @todo The board should be implemented as a class.
+ */
 
 #include "globals.h"
 
+/**
+ * @brief Represents the current state of a tile on the board.
+ * 
+ * This is stored a bitmask.
+ * @note PAC_TILE_EMPTY will always be 0,
+ *       and PAC_TILE_WALL will always be 1.
+ *       This allows checking if a tile is empty with the ! operator
+ */
 typedef enum {
-    PAC_TILE_EMPTY  = 0b0000, // MUST BE 0!
-    PAC_TILE_WALL   = 0b0001, // MUST BE 1! (see board.c)
+    PAC_TILE_EMPTY  = 0b0000,
+    PAC_TILE_WALL   = 0b0001,
 
     PAC_TILE_DOT    = 0b0010,
     PAC_TILE_PELLET = 0b0100,
     PAC_TILE_EATEN  = 0b1000,
 } wall_t;
 
-void pac_board_initialize();
+/**
+ * @brief Resets the board for the next level.
+ * 
+ * It replaces the dots and power pellets.
+ */
 void pac_board_reset();
+
+/**
+ * @brief Constructor.
+ * 
+ * The board will be begin in a new-level state,
+ * as if `pac_board_reset` had been called.
+ * @sa pac_board_reset
+ */
+void pac_board_initialize();
+
+/**
+ * @brief Draw the board.
+ */
 void pac_board_draw();
 
+/**
+ * @brief Check the kind of tile.
+ * @param[in] pos Position of the tile to check.
+ * @todo Please encapsulate.
+ */
 wall_t pac_board_kind(const unit_t pos[2]);
+
+/**
+ * @brief Remove a pellet from this board.
+ * 
+ * If the pellet was already eaten, does nothing.
+ * 
+ * @param[in] pos Position of the pellet.
+ * @todo return whether eaten.
+ */
 void pac_board_eat(const unit_t pos[2]);
 
 #endif
