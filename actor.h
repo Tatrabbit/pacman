@@ -43,7 +43,7 @@ typedef struct actor_s
     /**
      * @brief Reference to the tile to draw
      */
-    tex_idx_t atlas;
+    tex_idx_t tile;
 
     /**
      * @brief Pointer to concrete pac_actor_update_

@@ -134,5 +134,5 @@ static void draw_tile(tex_idx_t *tex_idx, size_t i, size_t tile)
     x = (i % PAC_SCREEN_TILES_W) * PAC_TILE_SIZE;
     y = i / PAC_SCREEN_TILES_W * PAC_TILE_SIZE;
 
-    pac_tex_draw_tile(tex_idx, x, y);
+    pac_tile_draw(tex_idx, x, y);
 }

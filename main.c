@@ -54,7 +54,41 @@ static int load_atlas(atlas_t *atlas, const char *argv0)
     if (!replace_basename(filename, argv0, "atlas.png"))
         return 0;
 
-	pac_atlas_init_image(atlas, filename);
+	return pac_atlas_init_image(atlas, filename);
+}
+
+static int initialize_atlases(atlas_t *tile_atlas, atlas_t *sprite_atlas, const char *argv0)
+{
+	// Tile Atlas
+	tile_atlas->sheet_width = 200;
+    tile_atlas->sheet_height = 186;
+	tile_atlas->tile_size = PAC_TILE_SIZE;
+
+    tile_atlas->margin_x = 1;
+	tile_atlas->margin_y = 1;
+
+	tile_atlas->sheet_padding_x = 1;
+	tile_atlas->sheet_padding_y = 1;
+
+	tile_atlas->n_sheets_w = 5;
+    tile_atlas->n_sheets_h = 4;;
+
+    tile_atlas->tile_padding_x = 1;
+	tile_atlas->tile_padding_y = 1;
+	
+	tile_atlas->n_tiles_w = 22;
+
+	// Texture
+	if (!load_atlas(tile_atlas, argv0))
+		return 0;
+
+	// Sprite Atlas
+	pac_atlas_init_atlas(sprite_atlas, tile_atlas);
+
+	sprite_atlas->margin_y += 82;
+
+	sprite_atlas->tile_size *= 2;
+	sprite_atlas->n_tiles_w /= 2;
 }
 
 int main(int argc, const char *argv[])
@@ -79,11 +113,11 @@ static int main_loop(const char *argv0)
 	if (!pac_event_init(&info))
 		return -1;
 
-	atlas_t atlas;
-	load_atlas(&atlas, argv0);
+	atlas_t tile_atlas, sprite_atlas;
+	initialize_atlases(&tile_atlas, &sprite_atlas, argv0);
 
-	pac_board_initialize(&atlas);
-	pac_actor_pacman_initialize(&actors[ACTOR_PACMAN], &atlas);
+	pac_board_initialize(&tile_atlas);
+	pac_actor_pacman_initialize(&actors[ACTOR_PACMAN], &sprite_atlas);
 
 	// TODO ghosts
 
@@ -115,7 +149,10 @@ static int main_loop(const char *argv0)
 		}
 	}
 
-	end:
+end:
+	pac_atlas_destroy(&tile_atlas);
+	pac_atlas_destroy(&sprite_atlas);
+
 	pac_event_cleanup(&info);
 	return (result & _QUIT) != 0;
 }

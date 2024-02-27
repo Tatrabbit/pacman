@@ -3,22 +3,6 @@
 #include "globals.h"
 #include <SDL2/SDL_image.h>
 
-////////////
-// Config //
-////////////
-
-#define SHEET_PALETTES_W 5
-#define SHEET_PALETTES_H 4
-#define SHEET_LEFT 1
-#define SHEET_TOP 1
-#define SHEET_WIDTH 200
-#define SHEET_HEIGHT 186
-
-#define SHEET_TILES_W 22u
-
-#define SPRITE_TOP 82u
-#define TILE_PADDING 1u
-
 
 /////////////
 // Externs //
@@ -28,37 +12,54 @@ int pac_atlas_init_image(atlas_t *self, const char *filename)
 {
     SDL_LogMessage(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO, "Loading %s", filename);
 
-	self->texture = IMG_LoadTexture(app.renderer, filename);
-    if(!self->texture)
+	self->_texture = IMG_LoadTexture(app.renderer, filename);
+    if(!self->_texture)
     {
         SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION, "%s\n", SDL_GetError());
         return 0;
     }
 
+    self->_has_ownership = 1;
+
+    int required_width = (self->sheet_width + self->sheet_padding_x) * self->n_sheets_w + self->margin_x;
+    int required_height = (self->sheet_height + self->sheet_padding_y) * self->n_sheets_h + self->margin_x;
+
     SDL_Rect r;
-	SDL_QueryTexture(self->texture, NULL, NULL, &r.w, &r.h);
-    if (r.w != 1024 || r.h != 1024)
+	SDL_QueryTexture(self->_texture, NULL, NULL, &r.w, &r.h);
+    if (r.w < required_width || r.h < required_height)
     {
-        SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION, "%s must be 1024x1024\n", filename);
+        SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION, "%s must be >= %dx%d\n", filename, required_width, required_height);
         return 0;
     }
 
     return 1;
 }
 
-void pac_atlas_destroy(atlas_t *atlas)
+void pac_atlas_init_atlas(atlas_t *self, const atlas_t *other)
 {
-    if (!atlas->texture)
-        return;
-
-    SDL_DestroyTexture(atlas->texture);
-    atlas->texture = 0;
+    memcpy(self, other, sizeof(atlas_t));
+    self->_has_ownership = 0;
 }
 
-static void draw_shared(int x, int y, const tex_idx_t *idx, int tile_scale, int yoffset)
+void pac_atlas_destroy(atlas_t *atlas)
 {
-    const int sheet_count = SHEET_PALETTES_W * SHEET_PALETTES_H;
-    const int tile_size = PAC_TILE_SIZE * tile_scale;
+    if (!atlas->_texture)
+        return;
+
+    if (!atlas->_has_ownership)
+        return;
+
+    SDL_DestroyTexture(atlas->_texture);
+    atlas->_texture = 0;
+}
+
+
+void pac_tile_draw(const tex_idx_t *idx, pixel_t x, pixel_t y)
+{
+    const atlas_t *const atlas = idx->atlas_ref;
+
+    const int sheet_count = atlas->n_sheets_w * atlas->n_sheets_h;
+    const int tile_size = atlas->tile_size;
 
     // Wrap palette index
     int palette_idx = idx->palette_idx % sheet_count;
@@ -67,12 +68,12 @@ static void draw_shared(int x, int y, const tex_idx_t *idx, int tile_scale, int 
 
     // Which sheet to use
     int sx, sy;
-    sx = palette_idx % SHEET_PALETTES_W;
-    sy = palette_idx / SHEET_PALETTES_W;
+    sx = palette_idx % atlas->n_sheets_w;
+    sy = palette_idx / atlas->n_sheets_w;
 
     int tx, ty;
-    tx = idx->tile_idx % (SHEET_TILES_W / tile_scale);
-    ty = idx->tile_idx / (SHEET_TILES_W / tile_scale);
+    tx = idx->tile_idx % atlas->n_tiles_w;
+    ty = idx->tile_idx / atlas->n_tiles_w;
 
     SDL_Rect source, dest;
     // Area = PAC_TILE_SIZE
@@ -83,24 +84,11 @@ static void draw_shared(int x, int y, const tex_idx_t *idx, int tile_scale, int 
     dest.y = y;
 
     // Source Position
-    source.x = SHEET_LEFT + (sx * SHEET_WIDTH);
-    source.x += (tile_size + TILE_PADDING) * tx;
+    source.x = atlas->margin_x + (sx * atlas->sheet_width);
+    source.x += (tile_size + atlas->tile_padding_x) * tx;
 
-    source.y = SHEET_TOP + (sy * SHEET_HEIGHT);
-    source.y += (tile_size + TILE_PADDING) * ty;
-    source.y += yoffset;
+    source.y = atlas->margin_y + (sy * atlas->sheet_height);
+    source.y += (tile_size + atlas->tile_padding_y) * ty;
 
-	SDL_RenderCopy(app.renderer, idx->atlas_ref->texture, &source, &dest);
-}
-
-void pac_tex_draw_sprite(const tex_idx_t *idx, pixel_t x, pixel_t y)
-{
-    // TODO my 1 texture atlas has 5x4 sheets.
-    // These two functions should be changed, so that the atlas knows its offset.
-    draw_shared(x, y, idx, 2u, SPRITE_TOP);
-}
-
-void pac_tex_draw_tile(const tex_idx_t *idx, pixel_t x, pixel_t y)
-{
-    draw_shared(x, y, idx, 1u, 0u);
+	SDL_RenderCopy(app.renderer, idx->atlas_ref->_texture, &source, &dest);
 }
