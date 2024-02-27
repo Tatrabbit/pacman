@@ -4,6 +4,7 @@ LDLIBS := -lSDL2 -lSDL2_image
 BUILD_DIR := $(ROOT_DIR)o
 
 SRCS := $(wildcard $(ROOT_DIR)*.c)
+HEADERS := $(wildcard $(ROOT_DIR)*.h) board_data.h
 OBJS := $(SRCS:%.c=%.o)
 
 all: pacman docs
@@ -14,18 +15,18 @@ pacman: $(OBJS)
 docs: doxygen.cfg $(SRCS) $(wildcard *.h)
 	doxygen doxygen.cfg
 
-actor.o: actor.h
-actor_pacman.o: actor_pacman.h board.h globals.h
-app.o: app.h globals.h
-board.o: board.h board_data.h
-event.o: event.h
-globals.o: globals.h
-main.o: actor_pacman.h app.h board.h event.h
-texture.o: texture.h app.h globals.h
+actor.o: $(HEADERS)
+actor_pacman.o: $(HEADERS)
+app.o: $(HEADERS)
+board.o: $(HEADERS)
+event.o: $(HEADERS)
+globals.o: $(HEADERS)
+main.o: $(HEADERS)
+texture.o: $(HEADERS)
 
-actor.h: globals.h texture.h
-actor_pacman.h: actor.h
-board.h: globals.h texture.h
+actor.h: $(HEADERS)
+actor_pacman.h: $(HEADERS)
+board.h: $(HEADERS)
 
 board_data.h: mediasrc/board_data.csv mediasrc/board_data.py
 	cd mediasrc && python board_data.py

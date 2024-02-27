@@ -19,16 +19,10 @@
  */
 typedef struct atlas_s
 {
-   /**
-     * @private
-     */
-    SDL_Texture *_texture;
-
     /**
      * @brief Width, in pixels, of one palette's sheet
      */
     unsigned short sheet_width;
-
 
     /**
      * @brief Height, in pixels, of one palette's sheet
@@ -88,35 +82,11 @@ typedef struct atlas_s
      */
     unsigned char n_tiles_w;
 
-    /**
-     * @private
-     */
+    /// @privatesection
+    SDL_Texture *_texture;
     unsigned char _has_ownership;
     
 } atlas_t;
-
-
-
-/**
- * @brief Specifies a reference to a tile and palette.
- */
-typedef struct
-{
-    /**
-     * @brief Pointer to the associated atlas.
-     */
-    const atlas_t *atlas_ref;
-
-    /**
-     * @brief Tile index
-    */
-    unsigned char tile_idx;
-
-    /**
-     * @brief Palette index
-     */
-    unsigned char palette_idx;
-} tex_idx_t;
 
 /**
  * @memberof atlas_s
@@ -149,6 +119,6 @@ void pac_atlas_destroy(atlas_t *);
  * @param x X Position, in pixels
  * @param y Y Position, in pixels
  */
-void pac_tile_draw(const tex_idx_t *, int x, int y);
+void pac_atlas_draw_tile(const atlas_t *, unsigned char tile, unsigned char pallete, int x, int y);
 
 #endif

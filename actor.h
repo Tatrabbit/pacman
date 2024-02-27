@@ -41,11 +41,6 @@ typedef unsigned char direction_t;
 typedef struct actor_s
 {
     /**
-     * @brief Reference to the tile to draw
-     */
-    tex_idx_t tile;
-
-    /**
      * @brief Pointer to concrete pac_actor_update_
      * @sa pac_actor_update_
      */
@@ -71,6 +66,11 @@ typedef struct actor_s
      * All other bits are reserved for a specific actor type.
      */
     direction_t flags;
+
+    /// @privatesection
+    const atlas_t *_atlas;
+    unsigned char _palette;
+    unsigned char _tile;
 }
 actor_t;
 

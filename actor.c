@@ -23,7 +23,7 @@ void pac_actor_draw(const actor_t *self)
     x += -3;
     y += -3;
 
-    pac_tile_draw(&self->tile, (int)x, (int)y);
+    pac_atlas_draw_tile(self->_atlas, self->_tile, self->_palette, (int)x, (int)y);
 }
 
 direction_t pac_purify_direction(direction_t flags)

@@ -4,7 +4,7 @@
 // Auto-generated; see board_data.py
 #include "board_data.h"
 static wall_t board_state[sizeof board_idx_data];
-static tex_idx_t tex_idx;
+static const atlas_t *atlas_ref;
 
 #define TILED_INVISIBLE_WALL 0x23
 #define TILED_DOT 0x25
@@ -13,14 +13,14 @@ static tex_idx_t tex_idx;
 #define INVISIBLE_WALL_INDEX 0xfe
 #define EMPTY_INDEX 0xff
 
-static void draw_tile(tex_idx_t *tex_idx, size_t i, size_t tile);
+static void draw_tile(size_t i, size_t tile, unsigned char palette);
 
 void pac_board_initialize(const atlas_t *atlas)
 {
     assert(PAC_TILE_EMPTY == 0);
     assert(PAC_TILE_WALL  == 1);
 
-    tex_idx.atlas_ref = atlas;
+    atlas_ref = atlas;
 
     for (size_t i = 0; i < sizeof board_idx_data; ++i)
     {
@@ -64,14 +64,12 @@ void pac_board_draw()
     end = PAC_SCREEN_TILES_W * header_height;
 
     // Header
-    tex_idx.palette_idx = 9;
+ 
 
     for (size_t i = start; i < end; ++i)
-        draw_tile(&tex_idx, i, board_idx_data[i]);
+        draw_tile(i, board_idx_data[i], 9);
 
     // Board
-    tex_idx.palette_idx = 8;
-
     start = end;
     end = PAC_SCREEN_TILES_W * (PAC_SCREEN_TILES_H - footer_height);
     for (size_t i = start; i < end; ++i)
@@ -82,17 +80,15 @@ void pac_board_draw()
         if (pellet && !(board_state[i] & PAC_TILE_EATEN))
             tile = (pellet == PAC_TILE_DOT) ? TILED_DOT : TILED_PELLET;
 
-        draw_tile(&tex_idx, i, tile);
+        draw_tile(i, tile, 8);
     }
     
     // TODO - show lives, fruit
     // Footer
-    tex_idx.palette_idx = 7;
-
     start = end;
     end += PAC_SCREEN_TILES_W * footer_height;
     for (size_t i = start; i < end; ++i)
-        draw_tile(&tex_idx, i, board_idx_data[i]);
+        draw_tile(i, board_idx_data[i], 7);
 }
 
 wall_t pac_board_kind(const unit_t pos[2])
@@ -124,15 +120,14 @@ void pac_board_eat(const unit_t pos[2])
     board_state[i] |= PAC_TILE_EATEN;
 }
 
-static void draw_tile(tex_idx_t *tex_idx, size_t i, size_t tile)
+static void draw_tile(size_t i, size_t tile, const unsigned char palette)
 {
-    tex_idx->tile_idx = tile;
-    if (tex_idx->tile_idx >= INVISIBLE_WALL_INDEX)
+    if (tile >= INVISIBLE_WALL_INDEX)
         return;
 
     int x, y;
     x = (i % PAC_SCREEN_TILES_W) * PAC_TILE_SIZE;
     y = i / PAC_SCREEN_TILES_W * PAC_TILE_SIZE;
 
-    pac_tile_draw(tex_idx, x, y);
+    pac_atlas_draw_tile(atlas_ref, tile, palette, x, y);
 }

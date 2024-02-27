@@ -54,26 +54,24 @@ void pac_atlas_destroy(atlas_t *atlas)
 }
 
 
-void pac_tile_draw(const tex_idx_t *idx, pixel_t x, pixel_t y)
+void pac_atlas_draw_tile(const atlas_t *self, unsigned char tile, unsigned char pallete, pixel_t x, pixel_t y)
 {
-    const atlas_t *const atlas = idx->atlas_ref;
-
-    const int sheet_count = atlas->n_sheets_w * atlas->n_sheets_h;
-    const int tile_size = atlas->tile_size;
+    const int sheet_count = self->n_sheets_w * self->n_sheets_h;
+    const int tile_size = self->tile_size;
 
     // Wrap palette index
-    int palette_idx = idx->palette_idx % sheet_count;
+    int palette_idx = pallete % sheet_count;
     if (palette_idx < 0)
         palette_idx += sheet_count;
 
     // Which sheet to use
     int sx, sy;
-    sx = palette_idx % atlas->n_sheets_w;
-    sy = palette_idx / atlas->n_sheets_w;
+    sx = palette_idx % self->n_sheets_w;
+    sy = palette_idx / self->n_sheets_w;
 
     int tx, ty;
-    tx = idx->tile_idx % atlas->n_tiles_w;
-    ty = idx->tile_idx / atlas->n_tiles_w;
+    tx = tile % self->n_tiles_w;
+    ty = tile / self->n_tiles_w;
 
     SDL_Rect source, dest;
     // Area = PAC_TILE_SIZE
@@ -84,11 +82,11 @@ void pac_tile_draw(const tex_idx_t *idx, pixel_t x, pixel_t y)
     dest.y = y;
 
     // Source Position
-    source.x = atlas->margin_x + (sx * atlas->sheet_width);
-    source.x += (tile_size + atlas->tile_padding_x) * tx;
+    source.x = self->margin_x + (sx * self->sheet_width);
+    source.x += (tile_size + self->tile_padding_x) * tx;
 
-    source.y = atlas->margin_y + (sy * atlas->sheet_height);
-    source.y += (tile_size + atlas->tile_padding_y) * ty;
+    source.y = self->margin_y + (sy * self->sheet_height);
+    source.y += (tile_size + self->tile_padding_y) * ty;
 
-	SDL_RenderCopy(app.renderer, idx->atlas_ref->_texture, &source, &dest);
+	SDL_RenderCopy(app.renderer, self->_texture, &source, &dest);
 }

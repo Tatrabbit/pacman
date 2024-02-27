@@ -89,6 +89,8 @@ static int initialize_atlases(atlas_t *tile_atlas, atlas_t *sprite_atlas, const 
 
 	sprite_atlas->tile_size *= 2;
 	sprite_atlas->n_tiles_w /= 2;
+
+	return 1;
 }
 
 int main(int argc, const char *argv[])
