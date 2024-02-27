@@ -6,7 +6,6 @@
 ////////////
 // Config //
 ////////////
-#define SHEET_FILENAME "atlas.png"
 
 #define SHEET_PALETTES_W 5
 #define SHEET_PALETTES_H 4
@@ -20,34 +19,24 @@
 #define SPRITE_TOP 82u
 #define TILE_PADDING 1u
 
-SDL_Texture *texture;
-const size_t buf_size = 512u;
-
-static void fast_basename(char *path, int length);
-static int replace_basename(char *buf, const char *path, const char *new_basename);
-
 
 /////////////
 // Externs //
 /////////////
 
-int pac_tex_init(const char *data_directory)
+int pac_atlas_init_image(atlas_t *self, const char *filename)
 {
-    SDL_LogMessage(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO, "Loading %s", SHEET_FILENAME);
+    SDL_LogMessage(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO, "Loading %s", filename);
 
-    char filename[buf_size];
-    if (!replace_basename(filename, data_directory, SHEET_FILENAME))
-        return 0;
-
-	texture = IMG_LoadTexture(app.renderer, filename);
-    if(!texture)
+	self->texture = IMG_LoadTexture(app.renderer, filename);
+    if(!self->texture)
     {
         SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION, "%s\n", SDL_GetError());
         return 0;
     }
 
     SDL_Rect r;
-	SDL_QueryTexture(texture, NULL, NULL, &r.w, &r.h);
+	SDL_QueryTexture(self->texture, NULL, NULL, &r.w, &r.h);
     if (r.w != 1024 || r.h != 1024)
     {
         SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION, "%s must be 1024x1024\n", filename);
@@ -57,13 +46,13 @@ int pac_tex_init(const char *data_directory)
     return 1;
 }
 
-void pac_tex_cleanup()
+void pac_atlas_destroy(atlas_t *atlas)
 {
-    if (!texture)
+    if (!atlas->texture)
         return;
 
-    SDL_DestroyTexture(texture);
-    texture = 0;
+    SDL_DestroyTexture(atlas->texture);
+    atlas->texture = 0;
 }
 
 static void draw_shared(int x, int y, const tex_idx_t *idx, int tile_scale, int yoffset)
@@ -101,67 +90,17 @@ static void draw_shared(int x, int y, const tex_idx_t *idx, int tile_scale, int 
     source.y += (tile_size + TILE_PADDING) * ty;
     source.y += yoffset;
 
-	SDL_RenderCopy(app.renderer, texture, &source, &dest);
+	SDL_RenderCopy(app.renderer, idx->atlas_ref->texture, &source, &dest);
 }
 
-// The 1 texture atlas has 5x4 sheets
-void pac_tex_draw_sprite(pixel_t x, pixel_t y, const tex_idx_t *idx)
+void pac_tex_draw_sprite(const tex_idx_t *idx, pixel_t x, pixel_t y)
 {
+    // TODO my 1 texture atlas has 5x4 sheets.
+    // These two functions should be changed, so that the atlas knows its offset.
     draw_shared(x, y, idx, 2u, SPRITE_TOP);
 }
 
-void pac_tex_draw_tile(pixel_t x, pixel_t y, const tex_idx_t *idx)
+void pac_tex_draw_tile(const tex_idx_t *idx, pixel_t x, pixel_t y)
 {
     draw_shared(x, y, idx, 1u, 0u);
-}
-
-
-////////////
-// Static //
-////////////
-
-/**
- * @brief similar to basename()
- * @param length strlen(path)
- * 
- * @todo Windows support
- */
-static void fast_basename(char *path, int length)
-{
-    // Iterate backwards and terminate after the /
-    char *name = path + length;
-
-    while (name >= path)
-    {
-        char c = *(name--);
-        if (c == '/')
-        {
-            *(name + 2) = '\0';
-            return;
-        }
-    }
-}
-
-/**
- * @brief Replace the basename of a path
- * 
- * @param buf temporary char array to use
- * @param path the path to replace the basename of
- * @param new_basename The new basename to use
- * @return non-zero on success
- */
-static int replace_basename(char *buf, const char *path, const char *new_basename)
-{
-    int idx = strlen(path);
-    if(idx >= buf_size)
-    {
-        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "%s\n", "Filename length error");
-        return 0;
-    }
-
-    strcpy(buf, path);
-    fast_basename(buf, idx);
-    strncat(buf, new_basename, buf_size);
-
-    return 1;
 }

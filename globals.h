@@ -32,6 +32,10 @@
  */
 #define PAC_UNITS_PER_TILE 800
 
+/**
+ * @brief Size of temporary string buffers.
+*/
+#define PAC_STR_BUF_SIZE ((size_t)512u)
 
 /**
  * @brief Signed integer representing whole pixels.
@@ -69,6 +73,30 @@ typedef unsigned short unit_t;
  * @return value in pixel space.
  */
 pixel_t pac_units2pixels(unit_t units);
+
+
+/**
+ * @brief Right-trims the basename from a path, leaving the trailing /
+ * @note @p length must be the size of @p path, as returned by `strlen()`
+ * 
+ * @param[in,out] path Filesystem path
+ * @param[in] length `strlen(path)`
+ * 
+ * @return Number of characters trimmed
+ * @todo Windows support
+ */
+size_t trim_basename_fast(char *path, int length);
+
+/**
+ * @brief Replace the basename of a path
+ * @note \p buf must be at least `PAC_STR_BUF_SIZE` to avoid buffer overflow
+ * 
+ * @param[out] buf An existing buffer to store the result
+ * @param[in] path The filesystem path to replace the basename of
+ * @param[in] new_basename The new basename to use
+ * @return non-zero on success
+ */
+int replace_basename(char buf[PAC_STR_BUF_SIZE], const char *path, const char *new_basename);
 
 
 #endif

@@ -8,6 +8,7 @@
  * @todo move direction stuff to globals.h
  */
 
+#include "texture.h"
 #include "globals.h"
 
 /**
@@ -39,10 +40,10 @@ typedef unsigned char direction_t;
  */
 typedef struct actor_s
 {
-    // tex_idx_t:
-    unsigned char tile_idx;
-    unsigned char palette_idx;
-    //
+    /**
+     * @brief Reference to the tile to draw
+     */
+    tex_idx_t atlas;
 
     /**
      * @brief Pointer to concrete pac_actor_update_

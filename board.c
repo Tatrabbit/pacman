@@ -1,11 +1,10 @@
 #include "board.h"
-#include "globals.h"
-#include "texture.h"
 #include <assert.h>
 
 // Auto-generated; see board_data.py
 #include "board_data.h"
 static wall_t board_state[sizeof board_idx_data];
+static tex_idx_t tex_idx;
 
 #define TILED_INVISIBLE_WALL 0x23
 #define TILED_DOT 0x25
@@ -16,10 +15,12 @@ static wall_t board_state[sizeof board_idx_data];
 
 static void draw_tile(tex_idx_t *tex_idx, size_t i, size_t tile);
 
-void pac_board_initialize()
+void pac_board_initialize(const atlas_t *atlas)
 {
     assert(PAC_TILE_EMPTY == 0);
     assert(PAC_TILE_WALL  == 1);
+
+    tex_idx.atlas_ref = atlas;
 
     for (size_t i = 0; i < sizeof board_idx_data; ++i)
     {
@@ -61,8 +62,6 @@ void pac_board_draw()
     pixel_t start, end;
     start = 0;
     end = PAC_SCREEN_TILES_W * header_height;
-
-    tex_idx_t tex_idx;
 
     // Header
     tex_idx.palette_idx = 9;
@@ -135,5 +134,5 @@ static void draw_tile(tex_idx_t *tex_idx, size_t i, size_t tile)
     x = (i % PAC_SCREEN_TILES_W) * PAC_TILE_SIZE;
     y = i / PAC_SCREEN_TILES_W * PAC_TILE_SIZE;
 
-    pac_tex_draw_tile(x, y, tex_idx);
+    pac_tex_draw_tile(tex_idx, x, y);
 }

@@ -28,7 +28,7 @@ typedef enum
 
 static actor_t actors[ACTOR_COUNT];
 
-static int main_loop();
+static int main_loop(const char *argv0);
 static result_t handle_pac_event(SDL_Event *evt);
 static result_t handle_sdl_event(SDL_Event *evt);
 
@@ -48,22 +48,29 @@ static void draw()
     SDL_RenderPresent(app.renderer);
 }
 
-int main(int argc, char *argv[])
+static int load_atlas(atlas_t *atlas, const char *argv0)
+{
+	char filename[PAC_STR_BUF_SIZE];
+    if (!replace_basename(filename, argv0, "atlas.png"))
+        return 0;
+
+	pac_atlas_init_image(atlas, filename);
+}
+
+int main(int argc, const char *argv[])
 {
 	int error;
 	if ((error = pac_app_init()))
 		return error;
 
-	pac_tex_init(argv[0]);
-
-	int success = main_loop();
+	int success = main_loop(argv[0]);
 
 	pac_app_cleanup();
 	return success;
 }
 
 // TODO create "main loop" modules for different scenes...
-static int main_loop()
+static int main_loop(const char *argv0)
 {
 	thread_info_t info;
 	SDL_Event evt;
@@ -72,9 +79,11 @@ static int main_loop()
 	if (!pac_event_init(&info))
 		return -1;
 
-	pac_board_initialize();
-	pac_board_reset();
-	pac_actor_pacman_initialize(&actors[ACTOR_PACMAN]);
+	atlas_t atlas;
+	load_atlas(&atlas, argv0);
+
+	pac_board_initialize(&atlas);
+	pac_actor_pacman_initialize(&actors[ACTOR_PACMAN], &atlas);
 
 	// TODO ghosts
 

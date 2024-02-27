@@ -8,6 +8,7 @@
  * @todo The board should be implemented as a class.
  */
 
+#include "texture.h"
 #include "globals.h"
 
 /**
@@ -40,8 +41,10 @@ void pac_board_reset();
  * The board will be begin in a new-level state,
  * as if `pac_board_reset` had been called.
  * @sa pac_board_reset
+ * 
+ * @param[in] atlas Existing atlas to use when drawing.
  */
-void pac_board_initialize();
+void pac_board_initialize(const atlas_t *atlas);
 
 /**
  * @brief Draw the board.

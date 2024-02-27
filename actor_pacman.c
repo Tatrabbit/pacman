@@ -1,5 +1,4 @@
 #include "actor_pacman.h"
-#include "actor.h"
 #include "board.h"
 #include "globals.h"
 #include <assert.h>
@@ -16,7 +15,7 @@ static const int speed = 60;
 // Externs //
 /////////////
 
-void pac_actor_pacman_initialize(actor_t *pacman)
+void pac_actor_pacman_initialize(actor_t *pacman, const atlas_t *atlas)
 {
     pacman->flags = 0;
     pacman->update = &update;
@@ -25,8 +24,9 @@ void pac_actor_pacman_initialize(actor_t *pacman)
     pacman->current_tile[0] = 14;
     pacman->current_tile[1] = 20;
 
-	pacman->tile_idx = 61;
-	pacman->palette_idx = 7;
+    pacman->atlas.atlas_ref = atlas;
+	pacman->atlas.tile_idx = 61;
+	pacman->atlas.palette_idx = 7;
 }
 
 void pac_actor_pacman_handle_keyboard(actor_t *pacman, const SDL_Event *evt)

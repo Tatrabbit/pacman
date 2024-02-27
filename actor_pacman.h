@@ -16,8 +16,10 @@
 /**
  * @memberof actor_s
  * @brief Initialize an actor_t as a Pacman.
+ * 
+ * @param[in] atlas Existing atlas to use when drawing
  */
-void pac_actor_pacman_initialize(actor_t *);
+void pac_actor_pacman_initialize(actor_t *, const atlas_t *atlas);
 
 /**
  * @memberof actor_s

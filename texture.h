@@ -8,17 +8,33 @@
  * 
  * In general, this should not be used directly by the game itself.
  * Instead, sprites and maps should own or use a texture atlas.
- * 
- * @todo Refactor into a class.
  */
 
 #include <SDL2/SDL.h>
+
+/**
+ * @brief Texture atlas
+ * 
+ * Responsible for the ownership and lifetime of SDL_Texture
+ */
+typedef struct atlas_s
+{
+    /**
+     * @brief The managed texture
+     */
+    SDL_Texture *texture;
+} atlas_t;
 
 /**
  * @brief Specifies a reference to a tile and palette.
  */
 typedef struct
 {
+    /**
+     * @brief Pointer to the associated atlas.
+     */
+    const atlas_t *atlas_ref;
+
     /**
      * @brief Tile index
     */
@@ -31,31 +47,33 @@ typedef struct
 } tex_idx_t;
 
 /**
- * @brief Acquire resources.
- * @param[in] data_directory the directory where atlas.png can be found (usually argv[0])
+ * @memberof atlas_s
+ * @brief Initialize from an image file.
+ * @param[in] filename Filename of texture image
  * @return non-zero on success, 0 on failure
  */
-int pac_tex_init(const char *data_directory);
+int pac_atlas_init_image(atlas_t *, const char *filename);
 
 /**
+ * @memberof atlas_s
  * @brief Free resources.
  */
-void pac_tex_cleanup();
+void pac_atlas_destroy(atlas_t *);
 
 /**
+ * @memberof tex_idx_t
  * @brief Draw a 16x16 character sprite.
  * @param x X Position, in pixels
  * @param y Y Position, in pixels
- * @param[in] idx tile/palette to use
  */
-void pac_tex_draw_sprite(int x, int y, const tex_idx_t *idx);
+void pac_tex_draw_sprite(const tex_idx_t *, int x, int y);
 
 /**
+ * @memberof tex_idx_t
  * @brief Draw an 8x8 background tile.
  * @param x X Position, in pixels
  * @param y Y Position, in pixels
- * @param[in] idx tile/palette to use
  */
-void pac_tex_draw_tile(int x, int y, const tex_idx_t *idx);
+void pac_tex_draw_tile(const tex_idx_t *, int x, int y);
 
 #endif

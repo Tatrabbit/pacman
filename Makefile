@@ -14,18 +14,18 @@ pacman: $(OBJS)
 docs: doxygen.cfg $(SRCS) $(wildcard *.h)
 	doxygen doxygen.cfg
 
-actor.o: actor.h texture.h
-actor_pacman.o: actor_pacman.h actor.h board.h globals.h
+actor.o: actor.h
+actor_pacman.o: actor_pacman.h board.h globals.h
 app.o: app.h globals.h
-board.o: board.h board_data.h globals.h texture.h
+board.o: board.h board_data.h
 event.o: event.h
 globals.o: globals.h
 main.o: actor_pacman.h app.h board.h event.h
 texture.o: texture.h app.h globals.h
 
-actor.h: globals.h
+actor.h: globals.h texture.h
 actor_pacman.h: actor.h
-board.h: globals.h
+board.h: globals.h texture.h
 
 board_data.h: mediasrc/board_data.csv mediasrc/board_data.py
 	cd mediasrc && python board_data.py

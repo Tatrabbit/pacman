@@ -21,7 +21,18 @@
  */
 typedef struct thread_info_s
 {
+    /**
+     * @brief String buffer.
+     * 
+     * This is used to share error message to main thread.
+     * When this string is empty, assume there is currently no error.
+     */
     char error[PAC_EVENT_ERROR_BUFSIZE];
+
+    /**
+     * @brief ID of the draw timer
+     * 
+     */
     SDL_TimerID timer_id;
 } thread_info_t;
 
