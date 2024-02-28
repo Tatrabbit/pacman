@@ -129,5 +129,5 @@ static void draw_tile(size_t i, size_t tile, const unsigned char palette)
     x = (i % PAC_SCREEN_TILES_W) * PAC_TILE_SIZE;
     y = i / PAC_SCREEN_TILES_W * PAC_TILE_SIZE;
 
-    pac_atlas_draw_tile(atlas_ref, tile, palette, x, y);
+    pac_atlas_draw_tile(atlas_ref, tile, palette, x, y, 0);
 }

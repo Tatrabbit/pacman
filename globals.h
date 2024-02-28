@@ -49,6 +49,7 @@ typedef unsigned short tile_t;
 
 /**
  * @brief Integer representing Pac Units.
+ * @todo refactor. Use only for storage, unsigned char.
  */
 typedef unsigned short unit_t;
 

@@ -54,7 +54,7 @@ void pac_atlas_destroy(atlas_t *atlas)
 }
 
 
-void pac_atlas_draw_tile(const atlas_t *self, unsigned char tile, unsigned char pallete, pixel_t x, pixel_t y)
+void pac_atlas_draw_tile(const atlas_t *self, unsigned char tile, unsigned char pallete, pixel_t x, pixel_t y, int flip_state)
 {
     const int sheet_count = self->n_sheets_w * self->n_sheets_h;
     const int tile_size = self->tile_size;
@@ -88,5 +88,5 @@ void pac_atlas_draw_tile(const atlas_t *self, unsigned char tile, unsigned char 
     source.y = self->margin_y + (sy * self->sheet_height);
     source.y += (tile_size + self->tile_padding_y) * ty;
 
-	SDL_RenderCopy(app.renderer, self->_texture, &source, &dest);
+    SDL_RenderCopyEx(app.renderer, self->_texture, &source, &dest, 0.0, NULL, flip_state);
 }

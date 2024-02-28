@@ -3,12 +3,13 @@
 #include "globals.h"
 #include <assert.h>
 
-// static const unsigned char pacman_anim_h[] = {39, 50};
+static const unsigned char pacman_anim[] = {39, 50};
 
 static void update(actor_t *self);
 static direction_t get_direction_from_keysym(SDL_Keycode sym);
 
-static const int speed = 60;
+#define MOVE_SPEED 60
+#define ANIM_SPEED 80
 
 
 /////////////
@@ -27,6 +28,9 @@ void pac_actor_pacman_initialize(actor_t *pacman, const atlas_t *atlas)
     pacman->_atlas = atlas;
 	pacman->_tile = 61;
 	pacman->_palette = 7;
+
+    pacman->anim_frame = 0;
+    pacman->_flip_state = SDL_FLIP_NONE;
 }
 
 void pac_actor_pacman_handle_keyboard(actor_t *pacman, const SDL_Event *evt)
@@ -120,7 +124,7 @@ static int advance_movement(actor_t *self)
     current_direction = self->flags & 0xf;
 
     // Advance pixels
-    self->move_distance += speed;
+    self->move_distance += MOVE_SPEED;
     int overflow = self->move_distance >= PAC_UNITS_PER_TILE;
 
     // Advance tiles, re-advance pixels
@@ -159,10 +163,38 @@ static int update_movement(actor_t *self)
     return 0;
 }
 
+static void update_animation(actor_t *self)
+{
+    const size_t animation_length = 2;
+
+    unsigned char flags = self->flags & 0xf;
+
+    if (!flags) // Is moving?
+        return;
+
+    self->anim_frame += ANIM_SPEED;
+    self->anim_frame %= PAC_UNITS_PER_TILE * animation_length;
+
+    size_t frame = self->anim_frame / PAC_UNITS_PER_TILE;
+    self->_tile = pacman_anim[frame];
+
+    if (flags & PAC_DIRECTION_VERTICAL)
+        self->_tile += 1;
+  
+    if (flags & PAC_DIRECTION_LEFT)
+        self->_flip_state = SDL_FLIP_HORIZONTAL;
+    else if (flags & PAC_DIRECTION_UP)
+        self->_flip_state = SDL_FLIP_VERTICAL;
+    else
+        self->_flip_state = 0;
+}
+
 static void update(actor_t *self)
 {
     if (update_movement(self))
         eat_pellet(self);
+
+    update_animation(self);
 }
 
 static direction_t get_direction_from_keysym(SDL_Keycode sym)

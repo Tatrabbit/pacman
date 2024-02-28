@@ -60,6 +60,14 @@ typedef struct actor_s
     unit_t move_distance;
 
     /**
+     * @brief Current frame of the animation.
+     * 
+     * Whole frames are in `PAC_UNITS_PER_TILE`.
+     * @sa PAC_UNITS_PER_TILE
+     */
+    unit_t anim_frame;
+
+    /**
      * @brief Direction of movement.
      * 
      * The rightmost nibble stores the current direction of movement.
@@ -71,6 +79,7 @@ typedef struct actor_s
     const atlas_t *_atlas;
     unsigned char _palette;
     unsigned char _tile;
+    unsigned char _flip_state;
 }
 actor_t;
 

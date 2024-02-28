@@ -119,6 +119,6 @@ void pac_atlas_destroy(atlas_t *);
  * @param x X Position, in pixels
  * @param y Y Position, in pixels
  */
-void pac_atlas_draw_tile(const atlas_t *, unsigned char tile, unsigned char pallete, int x, int y);
+void pac_atlas_draw_tile(const atlas_t *, unsigned char tile, unsigned char pallete, int x, int y, int flip_state);
 
 #endif
