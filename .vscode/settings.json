@@ -7,7 +7,7 @@
     },
     "files.associations": {
         "*.h": "c",
-    },
+            },
     "C_Cpp.doxygen.generatedStyle": "/**",
     "C_Cpp.commentContinuationPatterns": [
         "/**"

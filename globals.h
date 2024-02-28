@@ -76,18 +76,6 @@ pixel_t pac_units2pixels(unit_t units);
 
 
 /**
- * @brief Right-trims the basename from a path, leaving the trailing /
- * @note @p length must be the size of @p path, as returned by `strlen()`
- * 
- * @param[in,out] path Filesystem path
- * @param[in] length `strlen(path)`
- * 
- * @return Number of characters trimmed
- * @todo Windows support
- */
-size_t trim_basename_fast(char *path, int length);
-
-/**
  * @brief Replace the basename of a path
  * @note \p buf must be at least `PAC_STR_BUF_SIZE` to avoid buffer overflow
  * 
