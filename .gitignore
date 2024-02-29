@@ -10,6 +10,7 @@ docs
 # Temp
 *.sw?
 *.afphoto~lock~
+makefile.in
 
 # User
 *.tiled-session
