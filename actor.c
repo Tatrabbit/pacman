@@ -1,5 +1,8 @@
+#define _ACTOR_C
 #include "actor.h"
 #include <assert.h>
+
+#define ANIM_SPEED 80
 
 void pac_actor_get_position(const actor_t *self, unit_t position[2])
 {
@@ -53,6 +56,11 @@ int pac_same_axis(direction_t a, direction_t b)
     direction_t v = (overlap & PAC_DIRECTION_VERTICAL) != 0;
 
     return h != v;
+}
+
+void pac_actor_update()
+{
+    pac_actor_anim_frame += ANIM_SPEED;
 }
 
 // Horizontal movement takes precedence

@@ -3,6 +3,8 @@
 #include "event.h"
 #include "texture.h"
 #include "actor_pacman.h"
+#include "actor_ghost.h"
+#include "actor.h"
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_timer.h>
@@ -14,19 +16,12 @@ typedef enum
 	_NOTHING = 0x0,
 	_QUIT = 0x1,
 	_FRAME = 0x2,
+
+	_ERROR = -1
 } result_t;
 
 
-#define ACTOR_FIRST 0u
-
-#define ACTOR_PACMAN 0u
-
-// #define ACTOR_GHOST_FIRST 1u
-// #define ACTOR_GHOST_LAST 4u
-
-#define ACTOR_COUNT 1u
-
-static actor_t actors[ACTOR_COUNT];
+static actor_t actors[PAC_ACTOR_COUNT];
 
 static int main_loop(const char *argv0);
 static result_t handle_pac_event(SDL_Event *evt);
@@ -41,8 +36,8 @@ static void draw()
 	// Draw
 	pac_board_draw();
 
-	for (int i = ACTOR_FIRST; i < ACTOR_COUNT; ++i)
-		pac_actor_draw(&actors[i]);
+	for (int i = 0; i < PAC_ACTOR_COUNT; ++i)
+		(*actors[i].draw)(&actors[i]);
 
 	// Flip
     SDL_RenderPresent(app.renderer);
@@ -111,24 +106,31 @@ static int main_loop(const char *argv0)
 	thread_info_t info;
 	SDL_Event evt;
 	result_t result = _NOTHING;
-
-	if (!pac_event_init(&info))
-		return -1;
-
 	atlas_t tile_atlas, sprite_atlas;
+
+initialize_events:
+	if (!pac_event_init(&info))
+		return _ERROR;
+
+initialize_atlases:
 	initialize_atlases(&tile_atlas, &sprite_atlas, argv0);
 
+initialize_boards:
 	pac_board_initialize(&tile_atlas);
-	pac_actor_pacman_initialize(&actors[ACTOR_PACMAN], &sprite_atlas);
 
-	// TODO ghosts
+initialize_actors:
+	pac_actor_pacman_initialize(&actors[PAC_ACTOR_PLAYER], &sprite_atlas);
+
+	for ( size_t i = PAC_GHOST_FIRST; i <= PAC_GHOST_LAST; ++i)
+		pac_actor_ghost_initialize(&actors[i], &sprite_atlas, (enum pac_actor_e)i);
 
 	while (1)
 	{
 		if (!SDL_WaitEvent(&evt))
 		{
 			printf("Error: %s\n", SDL_GetError());
-			return -1;
+			result = _ERROR;
+			goto end;
 		}
 
 		pac_event_poll_errors(&info);
@@ -144,7 +146,9 @@ static int main_loop(const char *argv0)
 
 		if (result & _FRAME)
 		{
-			for (int i = 0; i < ACTOR_COUNT; ++i)
+			pac_actor_update();
+
+			for (int i = 0; i < PAC_ACTOR_COUNT; ++i)
 				(*actors[i].update)(&actors[i]);
 
 			draw();
@@ -177,7 +181,7 @@ static result_t handle_sdl_event(SDL_Event *evt)
 			return _QUIT;
 		case SDL_KEYDOWN:
 		case SDL_KEYUP:
-			pac_actor_pacman_handle_keyboard(&actors[ACTOR_PACMAN], evt);
+			pac_actor_pacman_handle_keyboard(&actors[PAC_ACTOR_PLAYER], evt);
 			return _NOTHING;
 	}
 

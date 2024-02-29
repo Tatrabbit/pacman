@@ -11,6 +11,34 @@
 #include "texture.h"
 #include "globals.h"
 
+enum pac_actor_e {
+    PAC_ACTOR_PLAYER = 0,
+
+    PAC_ACTOR_BLINKY = 1,
+
+    // TODO
+    // PAC_ACTOR_PINKY,
+    // PAC_ACTOR_INKY,
+    // PAC_ACTOR_CLYDE,
+
+    PAC_ACTOR_COUNT
+};
+
+#define PAC_GHOST_FIRST PAC_ACTOR_BLINKY
+#define PAC_GHOST_LAST (PAC_ACTOR_COUNT - 1)
+
+/**
+ * @brief Current frame of the animation.
+ * 
+ * Whole frames are in `PAC_UNITS_PER_TILE`.
+ * @sa PAC_UNITS_PER_TILE
+ */
+#ifndef _ACTOR_C
+extern
+#endif
+
+unit_t pac_actor_anim_frame;
+
 /**
  * @brief Directional bitmask.
  */
@@ -40,14 +68,29 @@ typedef unsigned char direction_t;
  */
 typedef struct actor_s
 {
+    // Entity:
+
     /**
-     * @brief Pointer to concrete pac_actor_update_
+     * @brief Pointer to concrete `pac_actor_update_`
      * @sa pac_actor_update_
      */
     void (*update)(struct actor_s *);
 
     /**
+     * @brief Pointer to concrete `pac_actor_draw`
+     * @sa pac_actor_draw
+     */
+    void (*draw)(const struct actor_s *);
+
+    /// @private
+    const atlas_t *_atlas;
+    
+    //
+
+    /**
      * @brief The currently occupied tile
+     * 
+     * @todo refactor to be specified in units; necessary for spawning ghosts and starting level
      */
     tile_t current_tile[2];
 
@@ -60,26 +103,21 @@ typedef struct actor_s
     unit_t move_distance;
 
     /**
-     * @brief Current frame of the animation.
-     * 
-     * Whole frames are in `PAC_UNITS_PER_TILE`.
-     * @sa PAC_UNITS_PER_TILE
-     */
-    unit_t anim_frame;
-
-    /**
      * @brief Direction of movement.
      * 
      * The rightmost nibble stores the current direction of movement.
-     * All other bits are reserved for a specific actor type.
+     * The leftmost nibble stores the next direction of movement.
+     * For players, this is the bitmask of which directional inputs are currently depressed.
+     * For ghosts, this is the direction the ghost will turn next tile.
      */
     direction_t flags;
 
     /// @privatesection
-    const atlas_t *_atlas;
     unsigned char _palette;
     unsigned char _tile;
     unsigned char _flip_state;
+
+    unsigned char _actor_kind;
 }
 actor_t;
 
@@ -132,14 +170,14 @@ void pac_add_direction_to_unit(unit_t unit[2], unit_t amount, direction_t flags)
 void pac_actor_get_position(const actor_t *, unit_t position[2]);
 
 /**
- * @brief Draw this actor.
  * @memberof actor_s
+ * @brief Draw this actor.
  * 
- * Internally, pac_tex_draw_sprite is called, using the app's global texture atlas.
- * 
- * @sa pac_tex_draw_sprite
+ * This is to be called once, in the main loop.
  */
 void pac_actor_draw(const actor_t *);
+
+void pac_actor_update();
 
 /**
  * @pure @protected @memberof actor_s

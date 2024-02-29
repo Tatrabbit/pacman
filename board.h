@@ -64,8 +64,9 @@ wall_t pac_board_kind(const unit_t pos[2]);
  * If the pellet was already eaten, does nothing.
  * 
  * @param[in] pos Position of the pellet.
- * @todo return whether eaten.
+ * @return Returns the wall type corresponding to the pellet removed, or `PAC_TILE_EMPTY`
+ *         if there were no changes.
  */
-void pac_board_eat(const unit_t pos[2]);
+wall_t pac_board_eat(const unit_t pos[2]);
 
 #endif

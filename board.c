@@ -101,7 +101,7 @@ wall_t pac_board_kind(const unit_t pos[2])
     return board_state[i];
 }
 
-void pac_board_eat(const unit_t pos[2])
+wall_t pac_board_eat(const unit_t pos[2])
 {
     size_t i, x, y;
     x = (size_t)pos[0] / PAC_UNITS_PER_TILE;
@@ -110,14 +110,15 @@ void pac_board_eat(const unit_t pos[2])
     i = x + (y * PAC_SCREEN_TILES_W);
 
     if (board_state[i] & PAC_TILE_EATEN)
-        return;
+        return PAC_TILE_EMPTY;
 
-    if (!(board_state[i] & (PAC_TILE_PELLET | PAC_TILE_DOT)))
-        return;
+    int type_eaten = board_state[i] & (PAC_TILE_PELLET | PAC_TILE_DOT);
 
-    // TODO On eaten!
+    if (!type_eaten)
+        return PAC_TILE_EMPTY;
 
     board_state[i] |= PAC_TILE_EATEN;
+    return type_eaten;
 }
 
 static void draw_tile(size_t i, size_t tile, const unsigned char palette)

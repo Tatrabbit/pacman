@@ -9,7 +9,6 @@ static void update(actor_t *self);
 static direction_t get_direction_from_keysym(SDL_Keycode sym);
 
 #define MOVE_SPEED 60
-#define ANIM_SPEED 80
 
 
 /////////////
@@ -18,19 +17,19 @@ static direction_t get_direction_from_keysym(SDL_Keycode sym);
 
 void pac_actor_pacman_initialize(actor_t *pacman, const atlas_t *atlas)
 {
-    pacman->flags = 0;
-    pacman->update = &update;
+    memset(pacman, 0, sizeof(actor_t));
 
-    pacman->move_distance = 0;
-    pacman->current_tile[0] = 14;
-    pacman->current_tile[1] = 20;
+    pacman->update = &update;
+    pacman->draw = &pac_actor_draw;
+
+    pacman->current_tile[0] = 13;
+    pacman->current_tile[1] = 26;
 
     pacman->_atlas = atlas;
 	pacman->_tile = 61;
 	pacman->_palette = 7;
 
-    pacman->anim_frame = 0;
-    pacman->_flip_state = SDL_FLIP_NONE;
+    pacman->_actor_kind = PAC_ACTOR_PLAYER;
 }
 
 void pac_actor_pacman_handle_keyboard(actor_t *pacman, const SDL_Event *evt)
@@ -172,10 +171,10 @@ static void update_animation(actor_t *self)
     if (!flags) // Is moving?
         return;
 
-    self->anim_frame += ANIM_SPEED;
-    self->anim_frame %= PAC_UNITS_PER_TILE * animation_length;
+    unit_t anim_frame = pac_actor_anim_frame % (PAC_UNITS_PER_TILE * 2);
+    anim_frame %= PAC_UNITS_PER_TILE * animation_length;
 
-    size_t frame = self->anim_frame / PAC_UNITS_PER_TILE;
+    size_t frame = anim_frame / PAC_UNITS_PER_TILE;
     self->_tile = pacman_anim[frame];
 
     if (flags & PAC_DIRECTION_VERTICAL)
