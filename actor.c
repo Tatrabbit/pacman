@@ -5,11 +5,6 @@
 
 #define ANIM_SPEED 80
 
-static int try_start_direction(actor_t *);
-static int try_reverse_direction(actor_t *);
-static int try_turn(actor_t *);
-static int advance_movement(actor_t *, int speed);
-
 void pac_actor_get_position(const actor_t *self, unit_t position[2])
 {
     position[0] = pac_tiles2units(self->current_tile[0]);
@@ -87,6 +82,28 @@ unsigned int pac_get_opposite_direction(unsigned int direction)
         default:
             return PAC_DIRECTION_DOWN;
     }
+}
+
+unsigned int pac_actor_try_reverse_direction_(actor_t *self)
+{
+    direction_t current_direction, choice_direction;
+
+    choice_direction = pac_purify_direction(self->flags >> 4);
+    if (!choice_direction)
+        return 0;
+
+    current_direction = pac_purify_direction(self->flags & 0xf);
+    if ( current_direction == choice_direction)
+        return 0;
+
+    if (!pac_same_axis(current_direction, choice_direction))
+        return 0;
+
+    // Reverse the location storage
+    pac_add_direction_to_tile(self->current_tile, -1, choice_direction);
+    self->move_distance = PAC_UNITS_PER_TILE - self->move_distance;
+
+    return (self->flags = (self->flags & 0xf0) | choice_direction);
 }
 
 // Horizontal movement takes precedence

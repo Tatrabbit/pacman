@@ -20,9 +20,6 @@ typedef enum
 	_ERROR = -1
 } result_t;
 
-
-static actor_t actors[PAC_ACTOR_COUNT];
-
 static int main_loop(const char *argv0);
 static result_t handle_pac_event(SDL_Event *evt);
 static result_t handle_sdl_event(SDL_Event *evt);
@@ -37,7 +34,7 @@ static void draw()
 	pac_board_draw();
 
 	for (int i = 0; i < PAC_ACTOR_COUNT; ++i)
-		(*actors[i].draw)(&actors[i]);
+		(*pac_actors[i].draw)(&pac_actors[i]);
 
 	// Flip
     SDL_RenderPresent(app.renderer);
@@ -119,10 +116,10 @@ initialize_boards:
 	pac_board_initialize(&tile_atlas);
 
 initialize_actors:
-	pac_actor_pacman_initialize(&actors[PAC_ACTOR_PLAYER], &sprite_atlas);
+	pac_actor_pacman_initialize(&pac_actors[PAC_ACTOR_PLAYER], &sprite_atlas);
 
 	for ( size_t i = PAC_GHOST_FIRST; i <= PAC_GHOST_LAST; ++i)
-		pac_actor_ghost_initialize(&actors[i], &sprite_atlas, (enum pac_actor_e)i);
+		pac_actor_ghost_initialize(&pac_actors[i], &sprite_atlas, (enum pac_actor_e)i);
 
 	while (1)
 	{
@@ -149,7 +146,7 @@ initialize_actors:
 			pac_actor_update();
 
 			for (int i = 0; i < PAC_ACTOR_COUNT; ++i)
-				(*actors[i].update)(&actors[i]);
+				(*pac_actors[i].update)(&pac_actors[i]);
 
 			draw();
 		}
@@ -181,7 +178,7 @@ static result_t handle_sdl_event(SDL_Event *evt)
 			return _QUIT;
 		case SDL_KEYDOWN:
 		case SDL_KEYUP:
-			pac_actor_pacman_handle_keyboard(&actors[PAC_ACTOR_PLAYER], evt);
+			pac_actor_pacman_handle_keyboard(&pac_actors[PAC_ACTOR_PLAYER], evt);
 			return _NOTHING;
 	}
 

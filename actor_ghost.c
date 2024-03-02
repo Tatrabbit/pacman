@@ -5,7 +5,7 @@
 
 static void update(actor_t *self);
 static void draw(const actor_t *self);
-static void pick_target(actor_t *self);
+static void pick_scatter_target(actor_t *self);
 
 void pac_actor_ghost_initialize(actor_t *self, const atlas_t *atlas, enum pac_actor_e kind)
 {
@@ -22,11 +22,11 @@ void pac_actor_ghost_initialize(actor_t *self, const atlas_t *atlas, enum pac_ac
 	self->_tile = 0;
 	self->_palette = 0;
 
-    // TODO other than blinky
     unsigned int next_direction = PAC_DIRECTION_LEFT << 4;
-
     self->_actor_flags = kind | next_direction;
     self->flags = next_direction;
+
+    pick_scatter_target(self);
 }
 
 static int get_anim_index(int direction)
@@ -45,25 +45,19 @@ static int get_anim_index(int direction)
     }
 }
 
-static float find_target_distance(const actor_t *self, tile_t choice[2])
+static unsigned int find_target_distance(const actor_t *self, tile_t choice[2])
 {
-    // unsigned int distance;
-    // distance = abs(choice[0] - self->_target_tile[0]);
-    // distance += abs(choice[1] - self->_target_tile[1]);
-
-    float x, y;
+    unsigned int x, y;
     x = choice[0] - self->_target_tile[0];
     y = choice[1] - self->_target_tile[1];
 
-    return x * x + y * y;
+    return x*x + y*y;
 }
 
 static unsigned int pick_direction(actor_t *self)
 {
-    float shortest_distance = MAXFLOAT, best_direction;
-    // unsigned int last_direction = pac_get_opposite_direction(self->flags & 0xf);
+    unsigned int shortest_distance = -1, best_direction;
     unsigned int from_direction = self->_actor_flags >> 4;
-    // from_direction = pac_get_opposite_direction(self->flags & 0xf);
 
     // foreach direction
     for (unsigned int i = 4; i--; )
@@ -94,25 +88,47 @@ static unsigned int pick_direction(actor_t *self)
     return best_direction;
 }
 
-static void pick_target(actor_t *self)
+static void update_target_direction(actor_t *self)
 {
-    // self->_target_tile[0] = PAC_SCREEN_TILES_W - 4;
-    // self->_target_tile[1] = 0;
-
-    self->_target_tile[0] = PAC_SCREEN_TILES_W - 13;
-    self->_target_tile[1] = 6;
-
     unsigned int new_flags = pick_direction(self);
-
-    printf("%d\n", new_flags);
 
     self->_actor_flags &= 0x0f;
     self->_actor_flags |= pac_get_opposite_direction(new_flags) << 4u;
 
     self->flags &= 0x0f;
     self->flags |= new_flags << 4u;
+}
 
-    // self->flags = new_flags;
+static void pick_target_blinky(actor_t *self)
+{
+    tile_t *target = pac_actors[PAC_ACTOR_PLAYER].current_tile;
+    memcpy(self->_target_tile, target, sizeof(tile_t) * 2);
+}
+
+static void pick_scatter_target(actor_t *self)
+{
+    switch ( self->_actor_flags & 0xf)
+    {
+    case PAC_ACTOR_BLINKY:
+        self->_target_tile[0] = PAC_SCREEN_TILES_W - 4;
+        self->_target_tile[1] = 0;
+        break;
+    }
+}
+
+static void pick_chase_target(actor_t *self)
+{
+    switch ( self->_actor_flags & 0xf)
+    {
+    case PAC_ACTOR_BLINKY:
+        return pick_target_blinky(self);
+    }
+}
+
+static void pick_target(actor_t *self)
+{
+    pick_chase_target(self);
+    update_target_direction(self);
 }
 
 static void update_animation(actor_t *self)
@@ -135,37 +151,8 @@ static int try_start_direction(actor_t *self)
     if (!direction)
         return 0;
 
-    // unit_t position[2];
-    // pac_actor_get_position(self, position);
-    // pac_add_direction_to_unit(position, PAC_UNITS_PER_TILE, direction);
-
-    // if (pac_board_kind_unit(position) & PAC_TILE_WALL)
-    //     return 0;
-
     self->flags = self->flags | direction;
     return 1;
-}
-
-static int try_reverse_direction(actor_t *self)
-{
-    direction_t current_direction, choice_direction;
-
-    choice_direction = pac_purify_direction(self->flags >> 4);
-    if (!choice_direction)
-        return 0;
-
-    current_direction = pac_purify_direction(self->flags & 0xf);
-    if ( current_direction == choice_direction)
-        return 0;
-
-    if (!pac_same_axis(current_direction, choice_direction))
-        return 0;
-
-    // Reverse the location storage
-    pac_add_direction_to_tile(self->current_tile, -1, choice_direction);
-    self->move_distance = PAC_UNITS_PER_TILE - self->move_distance;
-
-    return (self->flags = (self->flags & 0xf0) | choice_direction);
 }
 
 static int try_turn(actor_t *self)
@@ -182,13 +169,6 @@ static int try_turn(actor_t *self)
 
     if (pac_same_axis(choice_direction, current_direction))
         return 0;
-
-    // unit_t position[2];
-    // pac_actor_get_position(self, position);
-    // pac_add_direction_to_unit(position, PAC_UNITS_PER_TILE, choice_direction);
-
-    // if (pac_board_kind_unit(position) & PAC_TILE_WALL)
-    //     return 0;
     
     return self->flags = (self->flags & 0xf0) | choice_direction;
 }
@@ -213,7 +193,6 @@ static int advance_movement(actor_t *self)
         pac_add_direction_to_unit(position, PAC_UNITS_PER_TILE, current_direction);
         if (pac_board_kind_unit(position) & PAC_TILE_WALL)
         {
-            // pick_direction(self);
             self->move_distance = 0;
             self->flags = (self->flags & 0xf0);
         }
@@ -244,7 +223,6 @@ static int update_movement(actor_t *self)
 
 static void update(actor_t *self)
 {
-    // pick_target(self);
     update_movement(self);
     update_animation(self);
 }

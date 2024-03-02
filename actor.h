@@ -36,7 +36,6 @@ enum pac_actor_e {
 #ifndef _ACTOR_C
 extern
 #endif
-
 unit_t pac_actor_anim_frame;
 
 /**
@@ -123,6 +122,11 @@ typedef struct actor_s
 }
 actor_t;
 
+#ifndef _ACTOR_C
+extern
+#endif
+actor_t pac_actors[PAC_ACTOR_COUNT];
+
 /**
  * @brief Convert the given bitmask into a single enum value
  * 
@@ -183,6 +187,8 @@ void pac_actor_draw(const actor_t *);
 
 void pac_actor_update();
 
+unsigned int pac_actor_try_reverse_direction_(actor_t *self);
+
 /**
  * @pure @protected @memberof actor_s
  * @brief Update this actor.
@@ -191,5 +197,6 @@ void pac_actor_update();
  * specifically by the main loop.
  */
 void pac_actor_update_(actor_t *);
+
 
 #endif
