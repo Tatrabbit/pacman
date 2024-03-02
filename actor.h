@@ -46,10 +46,10 @@ enum pac_direction_e
 {
     PAC_DIRECTION_NONE = 0b0000,
 
-    PAC_DIRECTION_LEFT  = 0b0001,
-    PAC_DIRECTION_RIGHT = 0b0010,
-    PAC_DIRECTION_UP    = 0b0100,
-    PAC_DIRECTION_DOWN  = 0b1000,
+    PAC_DIRECTION_RIGHT = 0b0001,
+    PAC_DIRECTION_DOWN  = 0b0010,
+    PAC_DIRECTION_LEFT  = 0b0100,
+    PAC_DIRECTION_UP    = 0b1000,
 
     PAC_DIRECTION_HORIZONTAL = (PAC_DIRECTION_LEFT | PAC_DIRECTION_RIGHT),
     PAC_DIRECTION_VERTICAL   = (PAC_DIRECTION_UP | PAC_DIRECTION_DOWN),
@@ -117,7 +117,9 @@ typedef struct actor_s
     unsigned char _tile;
     unsigned char _flip_state;
 
-    unsigned char _actor_kind;
+    unsigned char _actor_flags;
+
+    tile_t _target_tile[2];
 }
 actor_t;
 
@@ -160,6 +162,8 @@ void pac_add_direction_to_tile(tile_t tile[2], tile_t amount, direction_t flags)
  * @note This function implicity calls `pac_purify_direction`
  */
 void pac_add_direction_to_unit(unit_t unit[2], unit_t amount, direction_t flags);
+
+unsigned int pac_get_opposite_direction(unsigned int direction);
 
 /**
  * @brief Get the position of this actor.

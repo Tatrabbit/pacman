@@ -29,7 +29,7 @@ void pac_actor_pacman_initialize(actor_t *pacman, const atlas_t *atlas)
 	pacman->_tile = 61;
 	pacman->_palette = 7;
 
-    pacman->_actor_kind = PAC_ACTOR_PLAYER;
+    pacman->_actor_flags = PAC_ACTOR_PLAYER;
 }
 
 void pac_actor_pacman_handle_keyboard(actor_t *pacman, const SDL_Event *evt)
@@ -63,7 +63,7 @@ static int try_start_direction(actor_t *self)
     pac_actor_get_position(self, position);
     pac_add_direction_to_unit(position, PAC_UNITS_PER_TILE, direction);
 
-    if (pac_board_kind(position) & PAC_TILE_WALL)
+    if (pac_board_kind_unit(position) & PAC_TILE_WALL)
         return 0;
 
     self->flags = self->flags | direction;
@@ -111,7 +111,7 @@ static int try_turn(actor_t *self)
     pac_actor_get_position(self, position);
     pac_add_direction_to_unit(position, PAC_UNITS_PER_TILE, choice_direction);
 
-    if (pac_board_kind(position) & PAC_TILE_WALL)
+    if (pac_board_kind_unit(position) & PAC_TILE_WALL)
         return 0;
     
     return self->flags = (self->flags & 0xf0) | choice_direction;
@@ -135,7 +135,7 @@ static int advance_movement(actor_t *self)
         unit_t position[2];
         pac_actor_get_position(self, position);
         pac_add_direction_to_unit(position, PAC_UNITS_PER_TILE, current_direction);
-        if (pac_board_kind(position) & PAC_TILE_WALL)
+        if (pac_board_kind_unit(position) & PAC_TILE_WALL)
         {
             self->move_distance = 0;
             self->flags = (self->flags & 0xf0);

@@ -20,12 +20,14 @@
  *       This allows checking if a tile is empty with the ! operator
  */
 typedef enum {
-    PAC_TILE_EMPTY  = 0b0000,
-    PAC_TILE_WALL   = 0b0001,
+    PAC_TILE_EMPTY  = 0x0,
+    PAC_TILE_WALL   = 0x1,
 
-    PAC_TILE_DOT    = 0b0010,
-    PAC_TILE_PELLET = 0b0100,
-    PAC_TILE_EATEN  = 0b1000,
+    PAC_TILE_DOT    = 0x2,
+    PAC_TILE_PELLET = 0x4,
+    PAC_TILE_EATEN  = 0x8,
+    PAC_TILE_NO_UP  = 0x10,
+
 } wall_t;
 
 /**
@@ -56,7 +58,15 @@ void pac_board_draw();
  * @param[in] pos Position of the tile to check.
  * @todo Please encapsulate.
  */
-wall_t pac_board_kind(const unit_t pos[2]);
+wall_t pac_board_kind_unit(const unit_t pos[2]);
+
+/**
+ * @brief Check the kind of tile.
+ * @param[in] pos Position of the tile to check.
+ * @todo Please encapsulate.
+ * @overload
+ */
+wall_t pac_board_kind_tile(const unit_t pos[2]);
 
 /**
  * @brief Remove a pellet from this board.

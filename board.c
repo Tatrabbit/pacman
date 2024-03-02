@@ -9,6 +9,8 @@ static const atlas_t *atlas_ref;
 #define TILED_INVISIBLE_WALL 0x23
 #define TILED_DOT 0x25
 #define TILED_PELLET 0x51
+#define TILED_NO_UP 0x50
+#define TILED_NO_UP_DOT 0x3a
 
 #define INVISIBLE_WALL_INDEX 0xfe
 #define EMPTY_INDEX 0xff
@@ -40,6 +42,16 @@ void pac_board_initialize(const atlas_t *atlas)
         case TILED_PELLET:
             board_idx_data[i] = EMPTY_INDEX;
             board_state[i] = PAC_TILE_PELLET;
+            break;
+
+        case TILED_NO_UP:
+            board_idx_data[i] = EMPTY_INDEX;
+            board_state[i] = PAC_TILE_NO_UP;
+            break;
+
+        case TILED_NO_UP_DOT:
+            board_idx_data[i] = EMPTY_INDEX;
+            board_state[i] = PAC_TILE_NO_UP | PAC_TILE_DOT;
             break;
 
         default:
@@ -91,13 +103,19 @@ void pac_board_draw()
         draw_tile(i, board_idx_data[i], 7);
 }
 
-wall_t pac_board_kind(const unit_t pos[2])
+wall_t pac_board_kind_unit(const unit_t pos[2])
 {
     size_t i, x, y;
     x = (size_t)pos[0] / PAC_UNITS_PER_TILE;
     y = (size_t)pos[1] / PAC_UNITS_PER_TILE;
 
     i = x + (y * PAC_SCREEN_TILES_W);
+    return board_state[i];
+}
+
+wall_t pac_board_kind_tile(const tile_t pos[2])
+{
+    size_t i = pos[0] + (pos[1] * PAC_SCREEN_TILES_W);
     return board_state[i];
 }
 

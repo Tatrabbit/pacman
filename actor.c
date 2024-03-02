@@ -1,8 +1,14 @@
 #define _ACTOR_C
 #include "actor.h"
+#include "board.h"
 #include <assert.h>
 
 #define ANIM_SPEED 80
+
+static int try_start_direction(actor_t *);
+static int try_reverse_direction(actor_t *);
+static int try_turn(actor_t *);
+static int advance_movement(actor_t *, int speed);
 
 void pac_actor_get_position(const actor_t *self, unit_t position[2])
 {
@@ -61,6 +67,26 @@ int pac_same_axis(direction_t a, direction_t b)
 void pac_actor_update()
 {
     pac_actor_anim_frame += ANIM_SPEED;
+}
+
+
+unsigned int pac_get_opposite_direction(unsigned int direction)
+{
+    switch ( direction )
+    {
+        case PAC_DIRECTION_RIGHT:
+            return PAC_DIRECTION_LEFT;
+
+        case PAC_DIRECTION_DOWN:
+            return PAC_DIRECTION_UP;
+
+        case PAC_DIRECTION_LEFT:
+            return PAC_DIRECTION_RIGHT;
+
+        case PAC_DIRECTION_UP:
+        default:
+            return PAC_DIRECTION_DOWN;
+    }
 }
 
 // Horizontal movement takes precedence
