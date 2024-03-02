@@ -1,5 +1,4 @@
 #include "texture.h"
-#include "app.h"
 #include "globals.h"
 #include <SDL2/SDL_image.h>
 

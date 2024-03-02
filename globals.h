@@ -6,9 +6,8 @@
  * 
  * @brief application-wide defines and typedefs, and helper utilities for them.
  */
-
-
 #include <stddef.h>
+#include <SDL2/SDL.h>
 
 /**
  * @brief Horizontal screen size, in tiles.
@@ -36,6 +35,43 @@
  * @brief Size of temporary string buffers.
 */
 #define PAC_STR_BUF_SIZE ((size_t)512u)
+
+/**
+ * @brief System-wide toolbox.
+ */
+struct app_s
+{
+	/**
+	 * @brief The main game window.
+	 */
+	SDL_Window *window;
+
+	/**
+	 * @brief The primary renderer.
+	 */
+	SDL_Renderer *renderer;
+};
+
+/**
+ * @brief Singleton defined in globals.c
+ */
+#ifndef _GLOBALS_C
+extern
+#endif
+struct app_s app;
+
+/**
+ * @static @memberof app_s
+ * @brief Acquire resources.
+ * @return Non-zero on success.
+ */
+int pac_app_init();
+
+/**
+ * @static @memberof app_s
+ * @brief free resources.
+ */
+void pac_app_cleanup();
 
 /**
  * @brief Signed integer representing whole pixels.

@@ -1,10 +1,10 @@
-#include "app.h"
 #include "board.h"
 #include "event.h"
 #include "texture.h"
 #include "actor_pacman.h"
 #include "actor_ghost.h"
 #include "actor.h"
+#include "globals.h"
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_timer.h>
