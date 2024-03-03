@@ -100,13 +100,12 @@ int main(int argc, const char *argv[])
 // TODO create "main loop" modules for different scenes...
 static int main_loop(const char *argv0)
 {
-	thread_info_t info;
 	SDL_Event evt;
 	result_t result = _NOTHING;
 	atlas_t tile_atlas, sprite_atlas;
 
 initialize_events:
-	if (!pac_event_init(&info))
+	if (!pac_event_init())
 		return _ERROR;
 
 initialize_atlases:
@@ -130,7 +129,7 @@ initialize_actors:
 			goto end;
 		}
 
-		pac_event_poll_errors(&info);
+		pac_event_poll_errors();
 
 		result = _NOTHING;
 		do
@@ -156,7 +155,7 @@ end:
 	pac_atlas_destroy(&tile_atlas);
 	pac_atlas_destroy(&sprite_atlas);
 
-	pac_event_cleanup(&info);
+	pac_event_cleanup();
 	return (result & _QUIT) != 0;
 }
 

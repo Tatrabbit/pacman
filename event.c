@@ -1,20 +1,54 @@
 #include "event.h"
 
+
+//////////////
+// Internal //
+//////////////
+
 #define FRAME_DELAY 10u
+
+/**
+ * @brief the maximum length of the error buffer
+ * @todo don't use this.
+*/
+#define PAC_EVENT_ERROR_BUFSIZE 256u
+
+
+static struct
+{
+    /**
+     * @brief String buffer.
+     * 
+     * This is used to share error message to main thread.
+     * When this string is empty, assume there is currently no error.
+     */
+    char error[PAC_EVENT_ERROR_BUFSIZE];
+
+    /**
+     * @brief ID of the draw timer
+     * 
+     */
+    SDL_TimerID timer_id;
+} thread_info;
 
 static int firstIndex;
 static unsigned int redraw_timer(unsigned int time, void *param);
 
-int pac_event_init(thread_info_t *info)
+
+/////////////
+// Externs //
+/////////////
+
+int pac_event_init()
 {
     firstIndex = SDL_RegisterEvents(PAC_EVENT_COUNT);
     if (firstIndex < 0)
         return 0;
 
-    info->error[0] = '\0';
+    thread_info.error[0] = '\0';
 
-    info->timer_id = SDL_AddTimer(FRAME_DELAY, redraw_timer, info);
-    if (!info->timer_id)
+    thread_info.timer_id = SDL_AddTimer(FRAME_DELAY, redraw_timer, NULL);
+    if (!thread_info.timer_id)
     {
         SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION, "%s", SDL_GetError());
         return 0;
@@ -23,18 +57,18 @@ int pac_event_init(thread_info_t *info)
     return 1;
 }
 
-void pac_event_cleanup(thread_info_t *info)
+void pac_event_cleanup()
 {
-    SDL_RemoveTimer(info->timer_id);
+    SDL_RemoveTimer(thread_info.timer_id);
 }
 
-int pac_event_poll_errors(thread_info_t *info)
+int pac_event_poll_errors()
 {
-    if(!info->error[0])
+    if(!thread_info.error[0])
         return 0;
 
-    SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, "%s", info->error);
-    info->error[0] = '\0';
+    SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, "%s", thread_info.error);
+    thread_info.error[0] = '\0';
     return 1;
 }
 
@@ -45,7 +79,6 @@ void pac_event_adjust(SDL_Event *evt)
 
 static unsigned int redraw_timer(unsigned int time, void *param)
 {
-    thread_info_t *info = (thread_info_t *)param;
     SDL_Event evt;
 
     memset(&evt, 0, sizeof(SDL_Event));
@@ -55,7 +88,7 @@ static unsigned int redraw_timer(unsigned int time, void *param)
     if (error < 0)
     {
         const char *message = SDL_GetError();
-        snprintf(info->error, PAC_EVENT_ERROR_BUFSIZE, "%s", message);
+        snprintf(thread_info.error, PAC_EVENT_ERROR_BUFSIZE, "%s", message);
     }
     return FRAME_DELAY;
 }

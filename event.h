@@ -5,58 +5,30 @@
  * @copyright MIT License. Full details are in the `LICENSE` file in the project's root directory.
  * 
  * @brief Handles App-specific events.
- * @todo Refactor into singleton.
  */
 
 #include <SDL2/SDL.h>
 
-/**
- * @brief the maximum length of the error buffer
- * @todo don't use this.
-*/
-#define PAC_EVENT_ERROR_BUFSIZE 256u
-
-/**
- * @brief Class representing an instance of this file.
- */
-typedef struct thread_info_s
-{
-    /**
-     * @brief String buffer.
-     * 
-     * This is used to share error message to main thread.
-     * When this string is empty, assume there is currently no error.
-     */
-    char error[PAC_EVENT_ERROR_BUFSIZE];
-
-    /**
-     * @brief ID of the draw timer
-     * 
-     */
-    SDL_TimerID timer_id;
-} thread_info_t;
 
 /**
  * @brief SDL User events
  */
-enum pac_event
+enum pac_event_e
 {
 	PAC_EVENT_DRAW = 0,
 	PAC_EVENT_COUNT
 };
 
 /**
- * @brief Constructor.
- * @memberof thread_info_s
+ * @brief Initializer.
  * @return int non-zero on success
  */
-int pac_event_init(thread_info_t *);
+int pac_event_init();
 
 /**
- * @memberof thread_info_s
  * @brief Destructor.
  */
-void pac_event_cleanup(thread_info_t *);
+void pac_event_cleanup();
 
 /**
  * @brief Convert from SDL event space to user event space.
@@ -74,6 +46,6 @@ void pac_event_adjust(SDL_Event *evt);
  * 
  * This should be called repeatedly every frame, until it returns 0.
  */
-int pac_event_poll_errors(thread_info_t *info);
+int pac_event_poll_errors();
 
 #endif

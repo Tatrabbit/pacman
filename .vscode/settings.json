@@ -9,7 +9,8 @@
         "*.h": "c",
         "__node_handle": "c",
         "chrono": "c",
-        "functional": "c"
+        "functional": "c",
+        "random": "c"
     },
     "C_Cpp.doxygen.generatedStyle": "/**",
     "C_Cpp.commentContinuationPatterns": [
