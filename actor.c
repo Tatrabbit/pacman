@@ -27,7 +27,7 @@ void pac_actor_draw(const actor_t *self)
     x += -3;
     y += -3;
 
-    pac_atlas_draw_tile(self->_atlas, self->_tile, self->_palette, (int)x, (int)y, self->_flip_state);
+    pac_atlas_draw_tile(app.sprite_atlas, self->_tile, self->_palette, (int)x, (int)y, self->_flip_state);
 }
 
 direction_t pac_purify_direction(direction_t flags)
@@ -62,8 +62,10 @@ int pac_same_axis(direction_t a, direction_t b)
 void pac_actor_update()
 {
     pac_actor_anim_frame += ANIM_SPEED;
-}
 
+    for (int i = 0; i < PAC_ACTOR_COUNT; ++i)
+        (*pac_actors[i].update)(&pac_actors[i]);
+}
 
 unsigned int pac_get_opposite_direction(unsigned int direction)
 {

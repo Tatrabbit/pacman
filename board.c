@@ -4,7 +4,6 @@
 // Auto-generated; see board_data.py
 #include "board_data.h"
 static wall_t board_state[sizeof board_idx_data];
-static const atlas_t *atlas_ref;
 
 #define TILED_INVISIBLE_WALL 0x23
 #define TILED_DOT 0x25
@@ -17,12 +16,10 @@ static const atlas_t *atlas_ref;
 
 static void draw_tile(size_t i, size_t tile, unsigned char palette);
 
-void pac_board_initialize(const atlas_t *atlas)
+void pac_board_initialize()
 {
     assert(PAC_TILE_EMPTY == 0);
     assert(PAC_TILE_WALL  == 1);
-
-    atlas_ref = atlas;
 
     for (size_t i = 0; i < sizeof board_idx_data; ++i)
     {
@@ -148,5 +145,5 @@ static void draw_tile(size_t i, size_t tile, const unsigned char palette)
     x = (i % PAC_SCREEN_TILES_W) * PAC_TILE_SIZE;
     y = i / PAC_SCREEN_TILES_W * PAC_TILE_SIZE;
 
-    pac_atlas_draw_tile(atlas_ref, tile, palette, x, y, 0);
+    pac_atlas_draw_tile(app.tile_atlas, tile, palette, x, y, 0);
 }

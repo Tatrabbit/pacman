@@ -7,7 +7,7 @@ static void update(actor_t *self);
 static void draw(const actor_t *self);
 static void pick_scatter_target(actor_t *self);
 
-void pac_actor_ghost_initialize(actor_t *self, const atlas_t *atlas, enum pac_actor_e kind)
+void pac_actor_ghost_initialize(actor_t *self, enum pac_actor_e kind)
 {
     memset(self, 0, sizeof(actor_t));
 
@@ -16,8 +16,6 @@ void pac_actor_ghost_initialize(actor_t *self, const atlas_t *atlas, enum pac_ac
 
     self->current_tile[0] = 13;
     self->current_tile[1] = 14;
-
-    self->_atlas = atlas;
 
 	self->_tile = 0;
 	self->_palette = 0;
@@ -236,7 +234,7 @@ static void draw(const actor_t *self)
     x = pac_tiles2pixels(self->_target_tile[0]);
     y = pac_tiles2pixels(self->_target_tile[1]);
 
-    pac_atlas_draw_tile(self->_atlas, target_index, self->_palette, (int)x, (int)y, 0);
+    pac_atlas_draw_tile(app.sprite_atlas, target_index, self->_palette, (int)x, (int)y, 0);
 
     // Base
     pac_actor_draw(self);

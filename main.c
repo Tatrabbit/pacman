@@ -1,43 +1,38 @@
-#include "board.h"
-#include "event.h"
+#include "game.h"
 #include "texture.h"
-#include "actor_pacman.h"
-#include "actor_ghost.h"
-#include "actor.h"
+#include "event.h"
 #include "globals.h"
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_timer.h>
-
-#include <stdio.h>
-
-typedef enum
+static result_t handle_pac_event(SDL_Event *evt)
 {
-	_NOTHING = 0x0,
-	_QUIT = 0x1,
-	_FRAME = 0x2,
+	switch(evt->type)
+	{
+		case PAC_EVENT_DRAW:
+			return _FRAME;
+	}
 
-	_ERROR = -1
-} result_t;
+	// TODO
 
-static int main_loop(const char *argv0);
-static result_t handle_pac_event(SDL_Event *evt);
-static result_t handle_sdl_event(SDL_Event *evt);
+	return _NOTHING;
+}
 
-static void draw()
+static result_t handle_sdl_event(SDL_Event *evt, scene_t *scene)
 {
-	// Clear to black
-	SDL_SetRenderDrawColor(app.renderer, 0, 0, 0, 255);
-    SDL_RenderClear(app.renderer);
+	result_t result = (*scene->handle_sdl_event)(evt);
 
-	// Draw
-	pac_board_draw();
+	switch (evt->type)
+	{
+		case SDL_QUIT:
+			return result | _QUIT;
+	}
 
-	for (int i = 0; i < PAC_ACTOR_COUNT; ++i)
-		(*pac_actors[i].draw)(&pac_actors[i]);
+	if (evt->type >= SDL_USEREVENT)
+	{
+		pac_event_adjust(evt);
+		return handle_pac_event(evt);
+	}
 
-	// Flip
-    SDL_RenderPresent(app.renderer);
+	return result;
 }
 
 static int load_atlas(atlas_t *atlas, const char *argv0)
@@ -49,8 +44,11 @@ static int load_atlas(atlas_t *atlas, const char *argv0)
 	return pac_atlas_init_image(atlas, filename);
 }
 
-static int initialize_atlases(atlas_t *tile_atlas, atlas_t *sprite_atlas, const char *argv0)
+static int initialize_atlases(const char *argv0)
 {
+	atlas_t *tile_atlas = app.tile_atlas;
+	atlas_t *sprite_atlas = app.sprite_atlas;
+
 	// Tile Atlas
 	tile_atlas->sheet_width = 200;
     tile_atlas->sheet_height = 186;
@@ -85,73 +83,85 @@ static int initialize_atlases(atlas_t *tile_atlas, atlas_t *sprite_atlas, const 
 	return 1;
 }
 
-int main(int argc, const char *argv[])
+static void draw(scene_t *scene)
 {
-	int error;
-	if ((error = pac_app_init()))
-		return error;
+	// Clear to black
+	SDL_SetRenderDrawColor(app.renderer, 0, 0, 0, 255);
+    SDL_RenderClear(app.renderer);
 
-	int success = main_loop(argv[0]);
+	scene->draw(scene);
 
-	pac_app_cleanup();
-	return success;
+	// Flip
+    SDL_RenderPresent(app.renderer);
 }
 
-// TODO create "main loop" modules for different scenes...
-static int main_loop(const char *argv0)
+result_t scene_loop_inner(scene_t *scene)
 {
-	SDL_Event evt;
-	result_t result = _NOTHING;
-	atlas_t tile_atlas, sprite_atlas;
-
-initialize_events:
-	if (!pac_event_init())
-		return _ERROR;
-
-initialize_atlases:
-	initialize_atlases(&tile_atlas, &sprite_atlas, argv0);
-
-initialize_boards:
-	pac_board_initialize(&tile_atlas);
-
-initialize_actors:
-	pac_actor_pacman_initialize(&pac_actors[PAC_ACTOR_PLAYER], &sprite_atlas);
-
-	for ( size_t i = PAC_GHOST_FIRST; i <= PAC_GHOST_LAST; ++i)
-		pac_actor_ghost_initialize(&pac_actors[i], &sprite_atlas, (enum pac_actor_e)i);
-
-	while (1)
+	for ( ;; )
 	{
+		SDL_Event evt;
+
 		if (!SDL_WaitEvent(&evt))
 		{
 			printf("Error: %s\n", SDL_GetError());
-			result = _ERROR;
-			goto end;
+			return _ERROR;
 		}
 
 		pac_event_poll_errors();
 
-		result = _NOTHING;
+		result_t result = _NOTHING;
 		do
 		{
-			result |= handle_sdl_event(&evt);
+			result |= handle_sdl_event(&evt, scene);
 			if(result & _QUIT)
-				goto end;
+				return _QUIT;
 		}
 		while (SDL_PollEvent(&evt));
 
 		if (result & _FRAME)
 		{
-			pac_actor_update();
-
-			for (int i = 0; i < PAC_ACTOR_COUNT; ++i)
-				(*pac_actors[i].update)(&pac_actors[i]);
-
-			draw();
+			scene->update(scene);
+			draw(scene);
 		}
 	}
 
-end:
+	return _NOTHING;
+}
+
+static result_t scene_loop_outer(scene_t *scene)
+{
+	if (scene->initialize)
+		scene->initialize(scene);
+
+	result_t result = scene_loop_inner(scene);
+
+	if (scene->free)
+		scene->free(scene);
+
+	return result;
+}
+
+static int outer_loop_all(const char *argv0)
+{
+	SDL_Event evt;
+
+	// Systems
+	if (!pac_event_init())
+		return _ERROR;
+
+	// Media
+	atlas_t tile_atlas, sprite_atlas;
+	app.tile_atlas = &tile_atlas;
+	app.sprite_atlas = &sprite_atlas;
+
+	initialize_atlases(argv0);
+
+	scene_t scene;
+
+	// Game:
+	pac_game_get_scene(&scene);
+	result_t result = scene_loop_outer(&scene);
+
 	pac_atlas_destroy(&tile_atlas);
 	pac_atlas_destroy(&sprite_atlas);
 
@@ -159,32 +169,17 @@ end:
 	return (result & _QUIT) != 0;
 }
 
-static result_t handle_pac_event(SDL_Event *evt)
+int main(int argc, const char *argv[])
 {
-	switch(evt->type)
-	{
-		case PAC_EVENT_DRAW:
-			return _FRAME;
-	}
-	return _NOTHING;
-}
+	app.argc = argc;
+	app.argv = argv;
 
-static result_t handle_sdl_event(SDL_Event *evt)
-{
-	switch (evt->type)
-	{
-		case SDL_QUIT:
-			return _QUIT;
-		case SDL_KEYDOWN:
-		case SDL_KEYUP:
-			pac_actor_pacman_handle_keyboard(&pac_actors[PAC_ACTOR_PLAYER], evt);
-			return _NOTHING;
-	}
+	int error;
+	if ((error = pac_app_init()))
+		return error;
 
-	if (evt->type >= SDL_USEREVENT)
-	{
-		pac_event_adjust(evt);
-		return handle_pac_event(evt);
-	}
-	return _NOTHING;
+	int success = outer_loop_all(argv[0]);
+
+	pac_app_cleanup();
+	return success;
 }

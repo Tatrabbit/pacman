@@ -80,9 +80,6 @@ typedef struct actor_s
      * @sa pac_actor_draw
      */
     void (*draw)(const struct actor_s *);
-
-    /// @private
-    const atlas_t *_atlas;
     
     //
 

@@ -15,7 +15,7 @@ static direction_t get_direction_from_keysym(SDL_Keycode sym);
 // Externs //
 /////////////
 
-void pac_actor_pacman_initialize(actor_t *pacman, const atlas_t *atlas)
+void pac_actor_pacman_initialize(actor_t *pacman)
 {
     memset(pacman, 0, sizeof(actor_t));
 
@@ -25,7 +25,6 @@ void pac_actor_pacman_initialize(actor_t *pacman, const atlas_t *atlas)
     pacman->current_tile[0] = 13;
     pacman->current_tile[1] = 26;
 
-    pacman->_atlas = atlas;
 	pacman->_tile = 61;
 	pacman->_palette = 7;
 

@@ -36,11 +36,16 @@
 */
 #define PAC_STR_BUF_SIZE ((size_t)512u)
 
+struct atlas_s;
+
 /**
  * @brief System-wide toolbox.
  */
 struct app_s
 {
+    int argc;
+    const char **argv;
+
 	/**
 	 * @brief The main game window.
 	 */
@@ -50,7 +55,33 @@ struct app_s
 	 * @brief The primary renderer.
 	 */
 	SDL_Renderer *renderer;
+
+    struct atlas_s *tile_atlas;
+    struct atlas_s *sprite_atlas;
 };
+
+typedef enum
+{
+	_NOTHING = 0x0,
+	_QUIT = 0x1,
+	_FRAME = 0x2,
+
+	_ERROR = -1
+} result_t;
+
+typedef struct scene_s
+{
+    result_t (*initialize)(struct scene_s *);
+    result_t (*free)(struct scene_s *);
+
+    result_t (*handle_sdl_event)(SDL_Event *);
+    result_t (*handle_user_event)(SDL_Event *);
+
+    void (*update)(struct scene_s *);
+    void (*draw)(struct scene_s *);
+
+    void *data;
+} scene_t;
 
 /**
  * @brief Singleton defined in globals.c
