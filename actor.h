@@ -175,6 +175,14 @@ unsigned int pac_get_opposite_direction(unsigned int direction);
 void pac_actor_get_position(const actor_t *, unit_t position[2]);
 
 /**
+ * @brief Get the position of this actor, taking into account movement
+ * @memberof actor_s
+ * 
+ * @param[out] position Current position in Unit Space
+ */
+void pac_actor_get_travel_position(const actor_t *, unit_t position[2]);
+
+/**
  * @memberof actor_s
  * @brief Draw this actor.
  * 

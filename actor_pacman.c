@@ -15,7 +15,7 @@ static direction_t get_direction_from_keysym(SDL_Keycode sym);
 // Externs //
 /////////////
 
-void pac_actor_pacman_initialize(actor_t *pacman)
+void pac_actor_pacman_reset(actor_t *pacman)
 {
     memset(pacman, 0, sizeof(actor_t));
 

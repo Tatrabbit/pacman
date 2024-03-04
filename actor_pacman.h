@@ -16,7 +16,7 @@
  * @memberof actor_s
  * @brief Initialize an actor_t as a Pacman.
  */
-void pac_actor_pacman_initialize(actor_t *);
+void pac_actor_pacman_reset(actor_t *);
 
 /**
  * @memberof actor_s

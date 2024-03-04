@@ -11,16 +11,21 @@ void pac_actor_get_position(const actor_t *self, unit_t position[2])
     position[1] = pac_tiles2units(self->current_tile[1]);
 }
 
-void pac_actor_draw(const actor_t *self)
+void pac_actor_get_travel_position(const actor_t *self, unit_t position[2])
 {
-    unit_t position[2];
-    pixel_t x, y;
-
-    assert(self->move_distance < PAC_UNITS_PER_TILE);
     pac_actor_get_position(self, position);
     pac_add_direction_to_unit(position, self->move_distance, self->flags);
+}
+
+void pac_actor_draw(const actor_t *self)
+{
+    assert(self->move_distance < PAC_UNITS_PER_TILE);
+
+    unit_t position[2];
+    pac_actor_get_travel_position(self, position);
 
     assert(sizeof(pixel_t) >= sizeof(int));
+    pixel_t x, y;
     x = pac_units2pixels(position[0]);
     y = pac_units2pixels(position[1]);
 

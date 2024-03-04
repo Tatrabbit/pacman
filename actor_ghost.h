@@ -17,6 +17,6 @@
  * 
  * @param[in] kind Which ghost to initialize
  */
-void pac_actor_ghost_initialize(actor_t *, enum pac_actor_e kind);
+void pac_actor_ghost_reset(actor_t *, enum pac_actor_e kind);
 
 #endif

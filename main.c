@@ -8,12 +8,12 @@ static result_t handle_pac_event(SDL_Event *evt)
 	switch(evt->type)
 	{
 		case PAC_EVENT_DRAW:
-			return _FRAME;
+			return PAC_RESULT_FRAME;
 	}
 
 	// TODO
 
-	return _NOTHING;
+	return PAC_RESULT_NOTHING;
 }
 
 static result_t handle_sdl_event(SDL_Event *evt, scene_t *scene)
@@ -23,7 +23,7 @@ static result_t handle_sdl_event(SDL_Event *evt, scene_t *scene)
 	switch (evt->type)
 	{
 		case SDL_QUIT:
-			return result | _QUIT;
+			return result | PAC_RESULT_QUIT;
 	}
 
 	if (evt->type >= SDL_USEREVENT)
@@ -104,28 +104,29 @@ result_t scene_loop_inner(scene_t *scene)
 		if (!SDL_WaitEvent(&evt))
 		{
 			printf("Error: %s\n", SDL_GetError());
-			return _ERROR;
+			return PAC_RESULT_ERROR;
 		}
 
 		pac_event_poll_errors();
 
-		result_t result = _NOTHING;
+		result_t result = PAC_RESULT_NOTHING;
 		do
 		{
 			result |= handle_sdl_event(&evt, scene);
-			if(result & _QUIT)
-				return _QUIT;
+			if(result & PAC_RESULT_QUIT)
+				return PAC_RESULT_QUIT;
 		}
 		while (SDL_PollEvent(&evt));
 
-		if (result & _FRAME)
+		if (result & PAC_RESULT_FRAME)
 		{
-			scene->update(scene);
+			result |= scene->update(scene);
 			draw(scene);
 		}
-	}
 
-	return _NOTHING;
+		if (result & PAC_RESULT_END)
+			return PAC_RESULT_END;
+	}
 }
 
 static result_t scene_loop_outer(scene_t *scene)
@@ -143,11 +144,9 @@ static result_t scene_loop_outer(scene_t *scene)
 
 static int outer_loop_all(const char *argv0)
 {
-	SDL_Event evt;
-
 	// Systems
 	if (!pac_event_init())
-		return _ERROR;
+		return -1;
 
 	// Media
 	atlas_t tile_atlas, sprite_atlas;
@@ -166,7 +165,7 @@ static int outer_loop_all(const char *argv0)
 	pac_atlas_destroy(&sprite_atlas);
 
 	pac_event_cleanup();
-	return (result & _QUIT) != 0;
+	return (result & PAC_RESULT_ERROR) ? -1 : 0;
 }
 
 int main(int argc, const char *argv[])

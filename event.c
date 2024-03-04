@@ -1,11 +1,9 @@
 #include "event.h"
-
+#include "globals.h"
 
 //////////////
 // Internal //
 //////////////
-
-#define FRAME_DELAY 10u
 
 /**
  * @brief the maximum length of the error buffer
@@ -47,7 +45,7 @@ int pac_event_init()
 
     thread_info.error[0] = '\0';
 
-    thread_info.timer_id = SDL_AddTimer(FRAME_DELAY, redraw_timer, NULL);
+    thread_info.timer_id = SDL_AddTimer(PAC_FRAME_DELAY, redraw_timer, NULL);
     if (!thread_info.timer_id)
     {
         SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION, "%s", SDL_GetError());
@@ -90,5 +88,5 @@ static unsigned int redraw_timer(unsigned int time, void *param)
         const char *message = SDL_GetError();
         snprintf(thread_info.error, PAC_EVENT_ERROR_BUFSIZE, "%s", message);
     }
-    return FRAME_DELAY;
+    return PAC_FRAME_DELAY;
 }

@@ -7,7 +7,7 @@ static void update(actor_t *self);
 static void draw(const actor_t *self);
 static void pick_scatter_target(actor_t *self);
 
-void pac_actor_ghost_initialize(actor_t *self, enum pac_actor_e kind)
+void pac_actor_ghost_reset(actor_t *self, enum pac_actor_e kind)
 {
     memset(self, 0, sizeof(actor_t));
 

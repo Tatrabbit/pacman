@@ -10,6 +10,11 @@
 #include <SDL2/SDL.h>
 
 /**
+ * @brief Number of milliseconds per frame
+ */
+#define PAC_FRAME_DELAY 10
+
+/**
  * @brief Horizontal screen size, in tiles.
 */
 #define PAC_SCREEN_TILES_W 28
@@ -62,11 +67,14 @@ struct app_s
 
 typedef enum
 {
-	_NOTHING = 0x0,
-	_QUIT = 0x1,
-	_FRAME = 0x2,
+	PAC_RESULT_NOTHING = 0x0,
 
-	_ERROR = -1
+	PAC_RESULT_QUIT = 0x1,
+    PAC_RESULT_END = 0x2,
+
+	PAC_RESULT_FRAME = 0x4,
+
+	PAC_RESULT_ERROR = -1
 } result_t;
 
 typedef struct scene_s
@@ -77,7 +85,7 @@ typedef struct scene_s
     result_t (*handle_sdl_event)(SDL_Event *);
     result_t (*handle_user_event)(SDL_Event *);
 
-    void (*update)(struct scene_s *);
+    result_t (*update)(struct scene_s *);
     void (*draw)(struct scene_s *);
 
     void *data;
